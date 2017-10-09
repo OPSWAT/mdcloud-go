@@ -1,0 +1,9 @@
+package: github.com/OPSWAT/mdcloud-go
+import:
+- package: github.com/aws/aws-sdk-go
+  version: ~v1.12.4
+- package: github.com/spf13/cobra
+  subpackages:
+  - cobra
+- package: github.com/pkg/errors
+  version: ~0.8.0
