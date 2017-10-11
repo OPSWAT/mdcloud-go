@@ -8,10 +8,10 @@ Command line tool for metadefender cloud ip scanner designed for scanning amazon
 
 The simple way of installing the tool:
 ```
-wget ... -O /usr/local/bin/mdcloud
+sudo wget -q https://github.com/OPSWAT/mdcloud-go/releases/download/1.0.0/mdcloud-go_linux_amd64 -O /usr/local/bin/mdcloud && sudo chmod +x /usr/local/bin/mdcloud
 ```
 
-Visit [this page]() for a list of alternative downloads.
+Visit [this page](https://github.com/OPSWAT/mdcloud-go/releases) for a list of alternative downloads.
 
 For building we use a docker image with all the dependencies installed. The image is built from `image.dockerfile` file
 
@@ -33,7 +33,9 @@ This will produce a folder `dist` which contains all executables.
 
 ## Usage
 
-Before running the tool, please make sure you have a metadefender cloud apikey. If not, please go to [metadefender.com](https://www.metadefender.com) and click the "Sign up" button.
+Before running the tool, please make sure you have
+- a metadefender cloud apikey. If not, please go to [metadefender.com](https://www.metadefender.com) and click the "Sign up" button.
+- an amazon account configured (config file used by the tool is `~/.aws/credentials`)
 
 After obtaining an apikey, you need to specify it in the command line by setting the "MDCLOUD_APIKEY" environment variable, or by passing it as an argument to the tool with `--apikey` like so:
 
@@ -110,6 +112,8 @@ $> mdcloud sglist
 95.76.19.167
 76.14.65.6
 ```
+
+## Notes
 
 For now this tool is designed specifically for scanning ip addresses in aws security groups. More functionality is yet to come :)
 
