@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/OPSWAT/mdcloud-go/api"
 	"github.com/fsnotify/fsnotify"
@@ -36,7 +37,7 @@ func watchDirScan(api api.API, path string, headers []string) {
 	defer watcher.Close()
 
 	if err := filepath.Walk(path, watchDir); err != nil {
-		log.Fatalln("ERROR:", err)
+		log.Fatalln("Error adding to watcher: ", err)
 	}
 
 	done := make(chan bool)
@@ -61,7 +62,7 @@ func watchDirScan(api api.API, path string, headers []string) {
 	<-done
 }
 func watchDir(path string, fi os.FileInfo, err error) error {
-	if fi.Mode().IsDir() {
+	if fi.Mode().IsDir() && !strings.HasPrefix(fi.Name(), ".") {
 		return watcher.Add(path)
 	}
 	return nil

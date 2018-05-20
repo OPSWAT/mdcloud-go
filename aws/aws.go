@@ -15,7 +15,7 @@ var (
 func LoadProfile() {
 	Session = session.Must(session.NewSession())
 	if _, err := Session.Config.Credentials.Get(); err != nil {
-		log.Fatalln("error loading credentials, credentials setup under ~/.aws/credentials")
+		log.Fatalln("Error loading credentials, credentials setup under ~/.aws/credentials")
 	}
 
 	// defaults to us-west-2
