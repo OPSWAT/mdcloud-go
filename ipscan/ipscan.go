@@ -14,9 +14,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/OPSWAT/mdcloud-go/api"
+
 	"github.com/pkg/errors"
 
-	"github.com/OPSWAT/mdcloud-go/api"
 	"github.com/OPSWAT/mdcloud-go/aws"
 	"github.com/OPSWAT/mdcloud-go/utils"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -111,7 +112,7 @@ func ScanSGs(sgs []string) {
 				if remaining, err := strconv.Atoi(resp.Header.Get("x-ratelimit-remaining")); err == nil {
 					if remaining > 0 {
 						for _, item := range batch {
-							println(item + " : OK")
+							fmt.Println(item + " : OK")
 						}
 					} else {
 						errc <- errors.New("limit reached")
@@ -132,7 +133,7 @@ func ScanSGs(sgs []string) {
 	case <-done:
 	case err := <-errc:
 		if err != nil {
-			println("error: ", err)
+			fmt.Println("error: ", err)
 			return
 		}
 	}
@@ -152,13 +153,13 @@ func ListIPs(sgs []string) {
 		}
 	}
 	if len(ips) == 0 {
-		println("security group empty")
+		fmt.Println("security group empty")
 		os.Exit(1)
 	}
 
 	// TODO: display security groups before
 	for _, ip := range ips {
-		println(ip)
+		fmt.Println(ip)
 	}
 }
 
@@ -182,6 +183,6 @@ func getGroups(sgs []string) {
 		groups, err = svc.DescribeSecurityGroups(&ec2.DescribeSecurityGroupsInput{})
 	}
 	if err != nil {
-		utils.ExitError("error requesting group description", err)
+		log.Fatalf("Error requesting group description: %v", err)
 	}
 }
