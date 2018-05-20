@@ -58,7 +58,7 @@ type HashLookupReq struct {
 func (api *API) HashDetails(hash string) string {
 	req, _ := http.NewRequest("GET", URL+"hash/"+hash, nil)
 	req.Header.Add("Authorization", "apikey "+api.Token)
-	return FmtResponse(api.Client.Do(req))
+	return fmtResponse(api.Client.Do(req))
 }
 
 // HashesDetails by file_ids
@@ -68,7 +68,7 @@ func (api *API) HashesDetails(hashes []string) string {
 	req, _ := http.NewRequest("POST", api.URL+"hash", bytes.NewBuffer(j))
 	req.Header.Add("Authorization", "apikey "+api.Token)
 	req.Header.Add("content-type", "application/json")
-	return FmtResponse(api.Client.Do(req))
+	return fmtResponse(api.Client.Do(req))
 }
 
 // HashVulnerabilities by file_ids
@@ -84,5 +84,5 @@ func (api *API) HashVulnerabilities(hash string, limit, offset int) string {
 	url.RawQuery = q.Encode()
 	req, _ := http.NewRequest("GET", url.String(), nil)
 	req.Header.Add("Authorization", "apikey "+api.Token)
-	return FmtResponse(api.Client.Do(req))
+	return fmtResponse(api.Client.Do(req))
 }

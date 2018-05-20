@@ -24,8 +24,7 @@ func NewAPI(apikey string) API {
 	}}
 }
 
-// FmtResponse to string from resp
-func FmtResponse(resp *http.Response, err error) string {
+func fmtResponse(resp *http.Response, err error) string {
 	if err != nil {
 		log.Fatal(err)
 	}

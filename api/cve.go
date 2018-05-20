@@ -8,7 +8,7 @@ import (
 func (api *API) GetCVEs() string {
 	req, _ := http.NewRequest("GET", URL+"cve", nil)
 	req.Header.Add("Authorization", "apikey "+api.Token)
-	return FmtResponse(api.Client.Do(req))
+	return fmtResponse(api.Client.Do(req))
 }
 
 // GetCVEDetails returns CVE details or products, vendors, hashes for that cve
@@ -24,5 +24,5 @@ func (api *API) GetCVEDetails(CVE, property string) string {
 	}
 	req, _ := http.NewRequest("GET", apiurl, nil)
 	req.Header.Add("Authorization", "apikey "+api.Token)
-	return FmtResponse(api.Client.Do(req))
+	return fmtResponse(api.Client.Do(req))
 }

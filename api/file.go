@@ -88,39 +88,50 @@ func (api *API) ScanFile(path string, headers []string) string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer resp.Body.Close()
 	var s = new(ScanResponse)
 	err = json.NewDecoder(resp.Body).Decode(&s)
+	defer resp.Body.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
+	if s.Success == false {
+		log.Fatal(resp.Status)
+	}
 
 	var jsonResult string
-	for range time.Tick(500 * time.Millisecond) {
-		result := new(DataIDResponse)
-		json.NewDecoder(strings.NewReader(api.ResultsByDataID(s.Data.DataID))).Decode(&result)
-		if result.Data.ScanResults.ProgressPercentage == 100 {
-			response, _ := json.Marshal(result)
-			jsonResult = string(response)
-			break
+	ticker := time.NewTicker(2 * time.Second)
+	defer ticker.Stop()
+	done := make(chan bool)
+	for {
+		select {
+		case <-ticker.C:
+			result := new(DataIDResponse)
+			json.NewDecoder(strings.NewReader(api.ResultsByDataID(s.Data.DataID))).Decode(&result)
+			if result.Data.ScanResults.ProgressPercentage == 100 {
+				response, _ := json.Marshal(result)
+				jsonResult = string(response)
+				go func() { done <- true }()
+			}
+			log.Printf("progress for %s: %d \n", s.Data.DataID, result.Data.ScanResults.ProgressPercentage)
+		case <-done:
+			close(done)
+			return jsonResult
 		}
-		log.Println("progress:", result.Data.ScanResults.ProgressPercentage)
 	}
-	return jsonResult
 }
 
 // ResultsByDataID by data_id
 func (api *API) ResultsByDataID(dataID string) string {
 	req, _ := http.NewRequest("GET", URL+"file/"+dataID, nil)
 	req.Header.Add("Authorization", "apikey "+api.Token)
-	return FmtResponse(api.Client.Do(req))
+	return fmtResponse(api.Client.Do(req))
 }
 
 // RescanFile by file_id
 func (api *API) RescanFile(fileID string) string {
 	req, _ := http.NewRequest("GET", URL+"file/"+fileID+"/rescan", nil)
 	req.Header.Add("Authorization", "apikey "+api.Token)
-	return FmtResponse(api.Client.Do(req))
+	return fmtResponse(api.Client.Do(req))
 }
 
 // RescanFiles by file_ids
@@ -130,14 +141,14 @@ func (api *API) RescanFiles(fileIDs []string) string {
 	req, _ := http.NewRequest("POST", api.URL+"file/rescan", bytes.NewBuffer(j))
 	req.Header.Add("Authorization", "apikey "+api.Token)
 	req.Header.Add("content-type", "application/json")
-	return FmtResponse(api.Client.Do(req))
+	return fmtResponse(api.Client.Do(req))
 }
 
 // GetSanitizedLink Retrieve the download link for a sanitized file
 func (api *API) GetSanitizedLink(fileID string) string {
 	req, _ := http.NewRequest("GET", URL+"file/"+fileID+"/sanitizedLink", nil)
 	req.Header.Add("Authorization", "apikey "+api.Token)
-	return FmtResponse(api.Client.Do(req))
+	return fmtResponse(api.Client.Do(req))
 }
 
 // FindOrScan file by hash

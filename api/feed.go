@@ -20,7 +20,7 @@ func (api *API) GetFalsePositivesFeed(engine string, page int) string {
 	url.RawQuery = q.Encode()
 	req, _ := http.NewRequest("GET", url.String(), nil)
 	req.Header.Add("Authorization", "apikey "+api.Token)
-	return FmtResponse(api.Client.Do(req))
+	return fmtResponse(api.Client.Do(req))
 }
 
 // GetInfectedHashesFeed gets newly discovered malicious hashes. The feed is updated on a daily basis and contains files that are detected as being malicious in the previous day by at least 3 engines.
@@ -41,7 +41,7 @@ func (api *API) GetInfectedHashesFeed(fmtType string, page int) string {
 	url.RawQuery = q.Encode()
 	req, _ := http.NewRequest("GET", url.String(), nil)
 	req.Header.Add("Authorization", "apikey "+api.Token)
-	return FmtResponse(api.Client.Do(req))
+	return fmtResponse(api.Client.Do(req))
 }
 
 // GetHashesFeed gets newly discovered hashes
@@ -54,12 +54,12 @@ func (api *API) GetHashesFeed(page int) string {
 	url.RawQuery = q.Encode()
 	req, _ := http.NewRequest("GET", url.String(), nil)
 	req.Header.Add("Authorization", "apikey "+api.Token)
-	return FmtResponse(api.Client.Do(req))
+	return fmtResponse(api.Client.Do(req))
 }
 
 // GetHashDownloadLink Retrieve the download link for a specific file. Any of the md5, sha1 and sha256 hashes can be used for downloading the file. This endpoint must be called for each file.
 func (api *API) GetHashDownloadLink(hash string) string {
 	req, _ := http.NewRequest("GET", URL+"file/"+hash+"/download", nil)
 	req.Header.Add("Authorization", "apikey "+api.Token)
-	return FmtResponse(api.Client.Do(req))
+	return fmtResponse(api.Client.Do(req))
 }
