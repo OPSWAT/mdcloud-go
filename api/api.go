@@ -3,7 +3,6 @@ package api
 import (
 	"io/ioutil"
 	"log"
-	"net"
 	"net/http"
 	"time"
 )
@@ -21,16 +20,7 @@ const URL = "https://api.metadefender.com/v3/"
 // NewAPI object
 func NewAPI(apikey string) API {
 	return API{Token: apikey, URL: URL, Client: http.Client{
-		Timeout: 60 * time.Second,
-		Transport: &http.Transport{
-			Dial: (&net.Dialer{
-				Timeout:   60 * time.Second,
-				KeepAlive: 60 * time.Second,
-			}).Dial,
-			TLSHandshakeTimeout:   10 * time.Second,
-			ResponseHeaderTimeout: 10 * time.Second,
-			ExpectContinueTimeout: 1 * time.Second,
-		},
+		Timeout: 300 * time.Second,
 	}}
 }
 

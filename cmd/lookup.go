@@ -12,8 +12,8 @@ var download bool
 // lookupCmd represents the lookup command
 var lookupCmd = &cobra.Command{
 	Use:   "lookup",
-	Short: "Lookup or download file",
-	Long:  "Lookup or download file by md5, sha1, sha256",
+	Short: "Lookup or download file or IP",
+	Long:  "Lookup or download file by md5, sha1, sha256 or IP",
 	Run: func(cmd *cobra.Command, args []string) {
 		var ips []string
 		var hashes []string

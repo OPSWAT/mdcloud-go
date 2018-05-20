@@ -45,3 +45,12 @@ func AppinfoByHash(api api.API, args []string) {
 		log.Fatal("Error: args count not valid")
 	}
 }
+
+// SanitizedByFileID lookup
+func SanitizedByFileID(api api.API, args []string) {
+	if len(args) == 1 {
+		fmt.Println(api.GetSanitizedLink(args[0]))
+	} else {
+		log.Fatal("Error: args count not valid")
+	}
+}

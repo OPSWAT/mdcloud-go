@@ -51,7 +51,7 @@ $> mdcloud --help
 Metadefender Cloud API wrapper
 
 Usage:
-  mdcloud-go [command]
+  mdcloud [command]
 
 Available Commands:
   help        Help about any command
