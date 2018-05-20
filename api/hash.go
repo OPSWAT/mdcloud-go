@@ -3,6 +3,7 @@ package api
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -56,24 +57,26 @@ type HashLookupReq struct {
 
 // HashDetails by file_id
 func (api *API) HashDetails(hash string) (string, error) {
-	req, _ := http.NewRequest("GET", URL+"hash/"+hash, nil)
+	url := fmt.Sprintf("%s/hash/%s", api.URL, hash)
+	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Add("Authorization", "apikey "+api.Token)
 	return fmtResponse(api.Client.Do(req))
 }
 
 // HashesDetails by file_ids
 func (api *API) HashesDetails(hashes []string) (string, error) {
+	url := fmt.Sprintf("%s/hash", api.URL)
 	payload := &HashLookupReq{Hashes: hashes}
 	j, _ := json.Marshal(payload)
-	req, _ := http.NewRequest("POST", api.URL+"hash", bytes.NewBuffer(j))
+	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(j))
 	req.Header.Add("Authorization", "apikey "+api.Token)
 	req.Header.Add("content-type", "application/json")
 	return fmtResponse(api.Client.Do(req))
 }
 
-// HashVulnerabilities by file_ids
+// HashVulnerabilities by hash
 func (api *API) HashVulnerabilities(hash string, limit, offset int) (string, error) {
-	url, _ := url.Parse(URL + "vulnerability/" + hash)
+	url, _ := url.Parse(fmt.Sprintf("%s/vulnerability/%s", api.URL, hash))
 	q := url.Query()
 	if limit > 0 {
 		q.Set("limit", strconv.Itoa(limit))

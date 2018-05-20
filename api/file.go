@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -67,12 +68,13 @@ type DataIDResponse struct {
 
 // ScanFile sends to API
 func (api *API) ScanFile(path string, headers []string) (string, error) {
+	url := fmt.Sprintf("%s/file", api.URL)
 	file, err := os.Open(path)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer file.Close()
-	req, err := http.NewRequest("POST", api.URL+"file", file)
+	req, err := http.NewRequest("POST", url, file)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -127,23 +129,26 @@ func (api *API) ScanFile(path string, headers []string) (string, error) {
 
 // ResultsByDataID by data_id
 func (api *API) ResultsByDataID(dataID string) (string, error) {
-	req, _ := http.NewRequest("GET", URL+"file/"+dataID, nil)
+	url := fmt.Sprintf("%s/file/%s", api.URL, dataID)
+	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Add("Authorization", "apikey "+api.Token)
 	return fmtResponse(api.Client.Do(req))
 }
 
 // RescanFile by file_id
 func (api *API) RescanFile(fileID string) (string, error) {
-	req, _ := http.NewRequest("GET", URL+"file/"+fileID+"/rescan", nil)
+	url := fmt.Sprintf("%s/file/%s/rescan", api.URL, fileID)
+	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Add("Authorization", "apikey "+api.Token)
 	return fmtResponse(api.Client.Do(req))
 }
 
 // RescanFiles by file_ids
 func (api *API) RescanFiles(fileIDs []string) (string, error) {
+	url := fmt.Sprintf("%s/file/rescan", api.URL)
 	payload := &RescanReq{FileIDs: fileIDs}
 	j, _ := json.Marshal(payload)
-	req, _ := http.NewRequest("POST", api.URL+"file/rescan", bytes.NewBuffer(j))
+	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(j))
 	req.Header.Add("Authorization", "apikey "+api.Token)
 	req.Header.Add("content-type", "application/json")
 	return fmtResponse(api.Client.Do(req))
@@ -151,7 +156,8 @@ func (api *API) RescanFiles(fileIDs []string) (string, error) {
 
 // GetSanitizedLink Retrieve the download link for a sanitized file
 func (api *API) GetSanitizedLink(fileID string) (string, error) {
-	req, _ := http.NewRequest("GET", URL+"file/"+fileID+"/sanitizedLink", nil)
+	url := fmt.Sprintf("%s/file/%s/sanitizedLink", api.URL, fileID)
+	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Add("Authorization", "apikey "+api.Token)
 	return fmtResponse(api.Client.Do(req))
 }

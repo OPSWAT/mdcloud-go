@@ -14,7 +14,7 @@ type API struct {
 }
 
 // URL for API
-const URL = "https://api.metadefender.com/v3/"
+const URL = "https://api.metadefender.com/v3"
 
 // NewAPI object
 func NewAPI(apikey string) API {
