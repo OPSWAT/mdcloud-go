@@ -79,9 +79,9 @@ func (api *API) ScanFile(path string, headers []string) string {
 	req.Header.Add("Content-Type", "binary/octet-stream")
 	req.Header.Add("x-filename", filepath.Base(path))
 	if len(headers) > 0 {
-		for _, hdr := range headers {
-			header := strings.Split("=", hdr)
-			req.Header.Add(header[0], header[1])
+		for _, v := range headers {
+			h := strings.Split(v, "=")
+			req.Header.Add(h[0], h[1])
 		}
 	}
 	resp, err := api.Client.Do(req)
@@ -104,7 +104,7 @@ func (api *API) ScanFile(path string, headers []string) string {
 			jsonResult = string(response)
 			break
 		}
-		log.Println("progress: ", result.Data.ScanResults.ProgressPercentage)
+		log.Println("progress:", result.Data.ScanResults.ProgressPercentage)
 	}
 	return jsonResult
 }
