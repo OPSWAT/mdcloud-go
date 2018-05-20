@@ -8,8 +8,8 @@ import (
 // appinfoCmd represents the appinfo command
 var appinfoCmd = &cobra.Command{
 	Use:   "appinfo",
-	Short: "appinfo for hash",
-	Long:  "appinfo for hash by sha1",
+	Short: "Appinfo for hash",
+	Long:  "Appinfo for hash by sha1",
 	Run: func(cmd *cobra.Command, args []string) {
 		lookup.AppinfoByHash(API, args)
 	},

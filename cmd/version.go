@@ -13,7 +13,7 @@ func init() {
 var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print the version number of mdcloud-go",
-	Long:  `All software has versions. This is mdcloud-go's`,
+	Long:  "All software has versions. This is mdcloud-go's",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("mdcloud-go " + VERSION)
 	},

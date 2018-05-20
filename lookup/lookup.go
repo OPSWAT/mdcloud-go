@@ -8,10 +8,14 @@ import (
 )
 
 // ByHash lookup
-func ByHash(api api.API, args []string) {
+func ByHash(api api.API, args []string, download bool) {
 	if len(args) > 0 {
 		if len(args) == 1 {
-			fmt.Println(api.HashDetails(args[0]))
+			if download {
+				fmt.Println(api.GetHashDownloadLink(args[0]))
+			} else {
+				fmt.Println(api.HashDetails(args[0]))
+			}
 		} else {
 			fmt.Println(api.HashesDetails(args))
 		}

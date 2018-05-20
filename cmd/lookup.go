@@ -7,11 +7,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var download bool
+
 // lookupCmd represents the lookup command
 var lookupCmd = &cobra.Command{
 	Use:   "lookup",
-	Short: "lookup file",
-	Long:  "lookup file by md5, sha1, sha267",
+	Short: "Lookup or download file",
+	Long:  "Lookup or download file by md5, sha1, sha256",
 	Run: func(cmd *cobra.Command, args []string) {
 		var ips []string
 		var hashes []string
@@ -26,11 +28,12 @@ var lookupCmd = &cobra.Command{
 			lookup.ByIP(API, ips)
 		}
 		if len(hashes) > 0 {
-			lookup.ByHash(API, hashes)
+			lookup.ByHash(API, hashes, download)
 		}
 	},
 }
 
 func init() {
 	RootCmd.AddCommand(lookupCmd)
+	lookupCmd.PersistentFlags().BoolVarP(&download, "download", "d", false, "get download url")
 }

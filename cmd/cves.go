@@ -8,8 +8,8 @@ import (
 // cvesCmd represents the cve command
 var cvesCmd = &cobra.Command{
 	Use:   "cves",
-	Short: "available CVE list",
-	Long:  "retrieve list of all CVEs",
+	Short: "Available CVE list",
+	Long:  "Retrieve list of all CVEs",
 	Run: func(cmd *cobra.Command, args []string) {
 		cve.List(API)
 	},

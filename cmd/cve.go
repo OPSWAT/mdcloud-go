@@ -11,7 +11,7 @@ var property string
 var cveCmd = &cobra.Command{
 	Use:   "cve",
 	Short: "CVE lookup",
-	Long:  "retrieve CVEs by name",
+	Long:  "Retrieve CVEs by name",
 	Run: func(cmd *cobra.Command, args []string) {
 		cve.Lookup(API, args[0], property)
 	},
