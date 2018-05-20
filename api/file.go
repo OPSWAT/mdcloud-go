@@ -139,3 +139,15 @@ func (api *API) GetSanitizedLink(fileID string) string {
 	req.Header.Add("Authorization", "apikey "+api.Token)
 	return FmtResponse(api.Client.Do(req))
 }
+
+// FindOrScan file by hash
+func (api *API) FindOrScan(path, hash string, headers []string) string {
+	result := new(HashLookupResp)
+	strRes := api.HashDetails(hash)
+	json.NewDecoder(strings.NewReader(strRes)).Decode(&result)
+	if result.Success == false {
+		log.Println("Hash not found sending to scan")
+		return api.ScanFile(path, headers)
+	}
+	return strRes
+}

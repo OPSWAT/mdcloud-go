@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/OPSWAT/mdcloud-go/api"
 	"github.com/fsnotify/fsnotify"
@@ -23,19 +24,20 @@ func Scan(api api.API, path []string, watch bool, headers []string) {
 		}
 		switch mode := fi.Mode(); {
 		case mode.IsDir():
-			watchDir(api, path[0], headers)
+			watchDirScan(api, path[0], headers)
 		case mode.IsRegular():
 			fmt.Printf(api.ScanFile(path[0], headers))
 		}
 	}
 }
 
-func watchDir(api api.API, path string, headers []string) {
-	watcher, err := fsnotify.NewWatcher()
-	if err != nil {
-		log.Fatal(err)
-	}
+func watchDirScan(api api.API, path string, headers []string) {
+	watcher, _ = fsnotify.NewWatcher()
 	defer watcher.Close()
+
+	if err := filepath.Walk(path, watchDir); err != nil {
+		log.Fatalln("ERROR:", err)
+	}
 
 	done := make(chan bool)
 	go func() {
@@ -45,11 +47,10 @@ func watchDir(api api.API, path string, headers []string) {
 				if (event.Op == fsnotify.Write) || (event.Op == fsnotify.Create) {
 					log.Println(event.Op, event.Name)
 					resSha1, err := getFileSha1(event.Name)
-					log.Println(resSha1)
 					if err != nil {
 						api.ScanFile(event.Name, headers)
 					} else {
-						fmt.Println(api.HashDetails(resSha1))
+						fmt.Println(api.FindOrScan(event.Name, resSha1, headers))
 					}
 				}
 			case err := <-watcher.Errors:
@@ -57,12 +58,13 @@ func watchDir(api api.API, path string, headers []string) {
 			}
 		}
 	}()
-
-	err = watcher.Add(path)
-	if err != nil {
-		log.Fatal(err)
-	}
 	<-done
+}
+func watchDir(path string, fi os.FileInfo, err error) error {
+	if fi.Mode().IsDir() {
+		return watcher.Add(path)
+	}
+	return nil
 }
 
 func getFileSha1(filePath string) (string, error) {
