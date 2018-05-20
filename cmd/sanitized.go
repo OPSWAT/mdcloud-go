@@ -7,11 +7,15 @@ import (
 
 // sanitizedCmd represents the lookup command
 var sanitizedCmd = &cobra.Command{
-	Use:   "sanitized",
+	Use:   "sanitized [file_id]",
 	Short: "Sanitized result by file_id",
 	Long:  "Sanitized result by file_id",
 	Run: func(cmd *cobra.Command, args []string) {
-		lookup.SanitizedByFileID(API, args)
+		if len(args) > 0 {
+			lookup.SanitizedByFileID(API, args)
+		} else {
+			cmd.Help()
+		}
 	},
 }
 

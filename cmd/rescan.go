@@ -7,11 +7,15 @@ import (
 
 // rescanCmd represents the rescan command
 var rescanCmd = &cobra.Command{
-	Use:   "rescan",
+	Use:   "rescan [file_id]",
 	Short: "Rescan file",
 	Long:  "Rescan file by file_id",
 	Run: func(cmd *cobra.Command, args []string) {
-		rescan.ByFileIDs(API, args)
+		if len(args) > 0 {
+			rescan.ByFileIDs(API, args)
+		} else {
+			cmd.Help()
+		}
 	},
 }
 
