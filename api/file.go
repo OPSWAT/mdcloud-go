@@ -3,6 +3,7 @@ package api
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"os"
@@ -65,7 +66,7 @@ type DataIDResponse struct {
 }
 
 // ScanFile sends to API
-func (api *API) ScanFile(path string, headers []string) string {
+func (api *API) ScanFile(path string, headers []string) (string, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		log.Fatal(err)
@@ -106,7 +107,11 @@ func (api *API) ScanFile(path string, headers []string) string {
 		select {
 		case <-ticker.C:
 			result := new(DataIDResponse)
-			json.NewDecoder(strings.NewReader(api.ResultsByDataID(s.Data.DataID))).Decode(&result)
+			resDataID, err := api.ResultsByDataID(s.Data.DataID)
+			if err != nil {
+				return "", errors.New("failed to get results for: " + resDataID)
+			}
+			json.NewDecoder(strings.NewReader(resDataID)).Decode(&result)
 			if result.Data.ScanResults.ProgressPercentage == 100 {
 				response, _ := json.Marshal(result)
 				jsonResult = string(response)
@@ -115,27 +120,27 @@ func (api *API) ScanFile(path string, headers []string) string {
 			log.Printf("progress for %s: %d \n", s.Data.DataID, result.Data.ScanResults.ProgressPercentage)
 		case <-done:
 			close(done)
-			return jsonResult
+			return jsonResult, nil
 		}
 	}
 }
 
 // ResultsByDataID by data_id
-func (api *API) ResultsByDataID(dataID string) string {
+func (api *API) ResultsByDataID(dataID string) (string, error) {
 	req, _ := http.NewRequest("GET", URL+"file/"+dataID, nil)
 	req.Header.Add("Authorization", "apikey "+api.Token)
 	return fmtResponse(api.Client.Do(req))
 }
 
 // RescanFile by file_id
-func (api *API) RescanFile(fileID string) string {
+func (api *API) RescanFile(fileID string) (string, error) {
 	req, _ := http.NewRequest("GET", URL+"file/"+fileID+"/rescan", nil)
 	req.Header.Add("Authorization", "apikey "+api.Token)
 	return fmtResponse(api.Client.Do(req))
 }
 
 // RescanFiles by file_ids
-func (api *API) RescanFiles(fileIDs []string) string {
+func (api *API) RescanFiles(fileIDs []string) (string, error) {
 	payload := &RescanReq{FileIDs: fileIDs}
 	j, _ := json.Marshal(payload)
 	req, _ := http.NewRequest("POST", api.URL+"file/rescan", bytes.NewBuffer(j))
@@ -145,20 +150,20 @@ func (api *API) RescanFiles(fileIDs []string) string {
 }
 
 // GetSanitizedLink Retrieve the download link for a sanitized file
-func (api *API) GetSanitizedLink(fileID string) string {
+func (api *API) GetSanitizedLink(fileID string) (string, error) {
 	req, _ := http.NewRequest("GET", URL+"file/"+fileID+"/sanitizedLink", nil)
 	req.Header.Add("Authorization", "apikey "+api.Token)
 	return fmtResponse(api.Client.Do(req))
 }
 
 // FindOrScan file by hash
-func (api *API) FindOrScan(path, hash string, headers []string) string {
+func (api *API) FindOrScan(path, hash string, headers []string) (string, error) {
 	result := new(HashLookupResp)
-	strRes := api.HashDetails(hash)
+	strRes, _ := api.HashDetails(hash)
 	json.NewDecoder(strings.NewReader(strRes)).Decode(&result)
 	if result.Success == false {
 		log.Println("Hash not found sending to scan")
 		return api.ScanFile(path, headers)
 	}
-	return strRes
+	return strRes, nil
 }

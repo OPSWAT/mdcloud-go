@@ -55,14 +55,14 @@ type HashLookupReq struct {
 }
 
 // HashDetails by file_id
-func (api *API) HashDetails(hash string) string {
+func (api *API) HashDetails(hash string) (string, error) {
 	req, _ := http.NewRequest("GET", URL+"hash/"+hash, nil)
 	req.Header.Add("Authorization", "apikey "+api.Token)
 	return fmtResponse(api.Client.Do(req))
 }
 
 // HashesDetails by file_ids
-func (api *API) HashesDetails(hashes []string) string {
+func (api *API) HashesDetails(hashes []string) (string, error) {
 	payload := &HashLookupReq{Hashes: hashes}
 	j, _ := json.Marshal(payload)
 	req, _ := http.NewRequest("POST", api.URL+"hash", bytes.NewBuffer(j))
@@ -72,7 +72,7 @@ func (api *API) HashesDetails(hashes []string) string {
 }
 
 // HashVulnerabilities by file_ids
-func (api *API) HashVulnerabilities(hash string, limit, offset int) string {
+func (api *API) HashVulnerabilities(hash string, limit, offset int) (string, error) {
 	url, _ := url.Parse(URL + "vulnerability/" + hash)
 	q := url.Query()
 	if limit > 0 {

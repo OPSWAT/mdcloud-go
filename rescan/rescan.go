@@ -11,9 +11,17 @@ import (
 func ByFileIDs(api api.API, fileIDs []string) {
 	if len(fileIDs) > 0 {
 		if len(fileIDs) == 1 {
-			fmt.Println(api.RescanFile(fileIDs[0]))
+			if res, err := api.RescanFile(fileIDs[0]); err == nil {
+				fmt.Println(res)
+			} else {
+				log.Fatalln(err)
+			}
 		} else {
-			fmt.Println(api.RescanFiles(fileIDs))
+			if res, err := api.RescanFiles(fileIDs); err == nil {
+				fmt.Println(res)
+			} else {
+				log.Fatalln(err)
+			}
 		}
 	} else {
 		log.Fatal("Error: args count not valid")

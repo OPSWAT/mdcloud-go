@@ -2,7 +2,6 @@ package api
 
 import (
 	"io/ioutil"
-	"log"
 	"net/http"
 	"time"
 )
@@ -11,7 +10,7 @@ import (
 type API struct {
 	URL    string
 	Token  string
-	Client http.Client
+	Client *http.Client
 }
 
 // URL for API
@@ -19,16 +18,16 @@ const URL = "https://api.metadefender.com/v3/"
 
 // NewAPI object
 func NewAPI(apikey string) API {
-	return API{Token: apikey, URL: URL, Client: http.Client{
+	return API{Token: apikey, URL: URL, Client: &http.Client{
 		Timeout: 300 * time.Second,
 	}}
 }
 
-func fmtResponse(resp *http.Response, err error) string {
+func fmtResponse(resp *http.Response, err error) (string, error) {
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 	defer resp.Body.Close()
 	body, _ := ioutil.ReadAll(resp.Body)
-	return string(body)
+	return string(body), nil
 }

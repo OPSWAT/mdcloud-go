@@ -12,12 +12,24 @@ func ByHash(api api.API, args []string, download bool) {
 	if len(args) > 0 {
 		if len(args) == 1 {
 			if download {
-				fmt.Println(api.GetHashDownloadLink(args[0]))
+				if res, err := api.GetHashDownloadLink(args[0]); err == nil {
+					fmt.Println(res)
+				} else {
+					log.Fatalln(err)
+				}
 			} else {
-				fmt.Println(api.HashDetails(args[0]))
+				if res, err := api.HashDetails(args[0]); err == nil {
+					fmt.Println(res)
+				} else {
+					log.Fatalln(err)
+				}
 			}
 		} else {
-			fmt.Println(api.HashesDetails(args))
+			if res, err := api.HashesDetails(args); err == nil {
+				fmt.Println(res)
+			} else {
+				log.Fatalln(err)
+			}
 		}
 	} else {
 		log.Fatal("Error: args count not valid")
@@ -28,9 +40,17 @@ func ByHash(api api.API, args []string, download bool) {
 func ByIP(api api.API, args []string) {
 	if len(args) > 0 {
 		if len(args) == 1 {
-			fmt.Println(api.IPDetails(args[0]))
+			if res, err := api.IPDetails(args[0]); err == nil {
+				fmt.Println(res)
+			} else {
+				log.Fatalln(err)
+			}
 		} else {
-			fmt.Println(api.IPsDetails(args))
+			if res, err := api.IPsDetails(args); err == nil {
+				fmt.Println(res)
+			} else {
+				log.Fatalln(err)
+			}
 		}
 	} else {
 		log.Fatal("Error: args count not valid")
@@ -40,7 +60,11 @@ func ByIP(api api.API, args []string) {
 // AppinfoByHash lookup
 func AppinfoByHash(api api.API, args []string) {
 	if len(args) == 1 {
-		fmt.Println(api.HashAppinfo(args[0]))
+		if res, err := api.HashAppinfo(args[0]); err == nil {
+			fmt.Println(res)
+		} else {
+			log.Fatalln(err)
+		}
 	} else {
 		log.Fatal("Error: args count not valid")
 	}
@@ -49,7 +73,11 @@ func AppinfoByHash(api api.API, args []string) {
 // SanitizedByFileID lookup
 func SanitizedByFileID(api api.API, args []string) {
 	if len(args) == 1 {
-		fmt.Println(api.GetSanitizedLink(args[0]))
+		if res, err := api.GetSanitizedLink(args[0]); err == nil {
+			fmt.Println(res)
+		} else {
+			log.Fatalln(err)
+		}
 	} else {
 		log.Fatal("Error: args count not valid")
 	}

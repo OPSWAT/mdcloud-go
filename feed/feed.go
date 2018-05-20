@@ -2,6 +2,7 @@ package feed
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/OPSWAT/mdcloud-go/api"
 )
@@ -11,13 +12,29 @@ func Lookup(api api.API, args []string, page int, engine, fmtType string) {
 	if args != nil && len(args) > 0 {
 		switch args[0] {
 		case "false-positives":
-			fmt.Println(api.GetFalsePositivesFeed(engine, page))
+			if res, err := api.GetFalsePositivesFeed(engine, page); err == nil {
+				fmt.Println(res)
+			} else {
+				log.Fatalln(err)
+			}
 		case "infected":
-			fmt.Println(api.GetInfectedHashesFeed(fmtType, page))
+			if res, err := api.GetInfectedHashesFeed(fmtType, page); err == nil {
+				fmt.Println(res)
+			} else {
+				log.Fatalln(err)
+			}
 		case "hashes":
-			fmt.Println(api.GetHashesFeed(page))
+			if res, err := api.GetHashesFeed(page); err == nil {
+				fmt.Println(res)
+			} else {
+				log.Fatalln(err)
+			}
 		}
 	} else {
-		fmt.Println(api.GetHashesFeed(page))
+		if res, err := api.GetHashesFeed(page); err == nil {
+			fmt.Println(res)
+		} else {
+			log.Fatalln(err)
+		}
 	}
 }

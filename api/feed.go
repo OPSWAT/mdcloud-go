@@ -7,7 +7,7 @@ import (
 )
 
 // GetFalsePositivesFeed gets newly discovered files which are considered possible false positives. An infected scan result is considered to be false positive if 2 or less engines detected the file as being infected. The feed is updated on a daily basis and contains files that are detected in the previous day. This feed contains data about all engines.
-func (api *API) GetFalsePositivesFeed(engine string, page int) string {
+func (api *API) GetFalsePositivesFeed(engine string, page int) (string, error) {
 	fpURL := URL + "feed/false-positives/"
 	if engine != "" {
 		fpURL += engine
@@ -24,7 +24,7 @@ func (api *API) GetFalsePositivesFeed(engine string, page int) string {
 }
 
 // GetInfectedHashesFeed gets newly discovered malicious hashes. The feed is updated on a daily basis and contains files that are detected as being malicious in the previous day by at least 3 engines.
-func (api *API) GetInfectedHashesFeed(fmtType string, page int) string {
+func (api *API) GetInfectedHashesFeed(fmtType string, page int) (string, error) {
 	url, _ := url.Parse(URL + "feed/infected")
 	q := url.Query()
 	switch fmtType {
@@ -45,7 +45,7 @@ func (api *API) GetInfectedHashesFeed(fmtType string, page int) string {
 }
 
 // GetHashesFeed gets newly discovered hashes
-func (api *API) GetHashesFeed(page int) string {
+func (api *API) GetHashesFeed(page int) (string, error) {
 	url, _ := url.Parse(URL + "feed/hashes")
 	q := url.Query()
 	if page > 0 {
@@ -58,7 +58,7 @@ func (api *API) GetHashesFeed(page int) string {
 }
 
 // GetHashDownloadLink Retrieve the download link for a specific file. Any of the md5, sha1 and sha256 hashes can be used for downloading the file. This endpoint must be called for each file.
-func (api *API) GetHashDownloadLink(hash string) string {
+func (api *API) GetHashDownloadLink(hash string) (string, error) {
 	req, _ := http.NewRequest("GET", URL+"file/"+hash+"/download", nil)
 	req.Header.Add("Authorization", "apikey "+api.Token)
 	return fmtResponse(api.Client.Do(req))

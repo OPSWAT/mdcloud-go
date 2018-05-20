@@ -27,7 +27,11 @@ func Scan(api api.API, path []string, watch bool, headers []string) {
 		case mode.IsDir():
 			watchDirScan(api, path[0], headers)
 		case mode.IsRegular():
-			fmt.Printf(api.ScanFile(path[0], headers))
+			if res, err := api.ScanFile(path[0], headers); err == nil {
+				fmt.Println(res)
+			} else {
+				log.Fatalln(err)
+			}
 		}
 	}
 }
@@ -51,7 +55,11 @@ func watchDirScan(api api.API, path string, headers []string) {
 					if err != nil {
 						api.ScanFile(event.Name, headers)
 					} else {
-						fmt.Println(api.FindOrScan(event.Name, resSha1, headers))
+						if res, err := api.FindOrScan(event.Name, resSha1, headers); err == nil {
+							fmt.Println(res)
+						} else {
+							log.Fatalln(err)
+						}
 					}
 				}
 			case err := <-watcher.Errors:

@@ -12,14 +12,14 @@ type IPLookupReq struct {
 }
 
 // IPDetails by file_id
-func (api *API) IPDetails(ip string) string {
+func (api *API) IPDetails(ip string) (string, error) {
 	req, _ := http.NewRequest("GET", URL+"ip/"+ip, nil)
 	req.Header.Add("Authorization", "apikey "+api.Token)
 	return fmtResponse(api.Client.Do(req))
 }
 
 // IPsDetails by file_ids
-func (api *API) IPsDetails(address []string) string {
+func (api *API) IPsDetails(address []string) (string, error) {
 	payload := &IPLookupReq{Address: address}
 	j, _ := json.Marshal(payload)
 	req, _ := http.NewRequest("POST", api.URL+"ip", bytes.NewBuffer(j))
