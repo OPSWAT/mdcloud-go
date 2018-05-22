@@ -3,6 +3,7 @@ package api
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -13,16 +14,18 @@ type IPLookupReq struct {
 
 // IPDetails by file_id
 func (api *API) IPDetails(ip string) (string, error) {
-	req, _ := http.NewRequest("GET", URL+"ip/"+ip, nil)
+	url := fmt.Sprintf("%s/ip/%s", api.URL, ip)
+	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Add("Authorization", "apikey "+api.Token)
 	return fmtResponse(api.Client.Do(req))
 }
 
 // IPsDetails by file_ids
 func (api *API) IPsDetails(address []string) (string, error) {
+	url := fmt.Sprintf("%s/ip", api.URL)
 	payload := &IPLookupReq{Address: address}
 	j, _ := json.Marshal(payload)
-	req, _ := http.NewRequest("POST", api.URL+"ip", bytes.NewBuffer(j))
+	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(j))
 	req.Header.Add("Authorization", "apikey "+api.Token)
 	req.Header.Add("content-type", "application/json")
 	return fmtResponse(api.Client.Do(req))
