@@ -1,4 +1,4 @@
-<a href="https://metadefender.opswat.com"><img src="https://raw.githubusercontent.com/OPSWAT/mdcloud-go/master/images/MD-Cloud-logo-black.svg" height="30%" width="30%"></a>
+![logo](images/MD-Cloud-logo-black.svg)<!-- .element height="10%" width="10%" -->
 
 mdcloud cli
 ------------
@@ -40,7 +40,7 @@ Before running the tool, please make sure you have
 After obtaining an apikey, you need to specify it in the command line by setting the `MDCLOUD_APIKEY` environment variable, or by passing it as an argument to the tool with `--apikey` like so:
 
 ```
-$> mdcloud --apikey <command>
+mdcloud --apikey <command>
 ```
 
 The outputs of the source code are executables compiled for specific platforms.
