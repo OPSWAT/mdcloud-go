@@ -1,13 +1,14 @@
 ![logo](images/MD-Cloud-logo-black.svg)<!-- .element height="10%" width="10%" -->
 
-mdcloud cli
-------------
+# mdcloud cli
+
 Command line tool for metadefender cloud ip scanner designed for scanning amazon security groups.
 
 ## Build and install
 
 The simple way of installing the tool:
-```
+
+```bash
 sudo wget -q https://github.com/OPSWAT/mdcloud-go/releases/download/1.1.0/mdcloud-go_linux_amd64 -O /usr/local/bin/mdcloud && sudo chmod +x /usr/local/bin/mdcloud
 ```
 
@@ -19,13 +20,13 @@ The docker image is hosted on a public repo on docker hub and can be downloaded 
 
 Just in case, here is how to build the docker image:
 
-```
+```bash
 make image VERSION=<new_version_of_docker_image>
 ```
 
 For compiling the source code run:
 
-```
+```bash
 make build VERSION=<version of executable>
 ```
 
@@ -33,20 +34,22 @@ This will produce a folder `dist` which contains all executables.
 
 ## Usage
 
-Before running the tool, please make sure you have
+Before running the tool, please make sure you have:
+
 - a metadefender cloud apikey. If not, please go to [metadefender.com](https://www.metadefender.com) and click the "Sign up" button.
 - an amazon account configured (config file used by the tool is `~/.aws/credentials`)
 
 After obtaining an apikey, you need to specify it in the command line by setting the `MDCLOUD_APIKEY` environment variable, or by passing it as an argument to the tool with `--apikey` like so:
 
-```
+```bash
 mdcloud --apikey <command>
 ```
 
 The outputs of the source code are executables compiled for specific platforms.
 
 To see possible options run:
-```
+
+```bash
 $ mdcloud
 Metadefender Cloud API wrapper
 
