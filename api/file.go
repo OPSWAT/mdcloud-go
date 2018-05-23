@@ -5,12 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 // RescanReq used for rescan body
@@ -71,14 +72,14 @@ func (api *API) ScanFile(path string, headers []string) (string, error) {
 	url := fmt.Sprintf("%s/file", api.URL)
 	file, err := os.Open(path)
 	if err != nil {
-		log.Fatal(err)
+		logrus.Fatalln(err)
 	}
 	defer file.Close()
-	req, err := http.NewRequest("POST", url, file)
+	req, err := http.NewRequest(http.MethodPost, url, file)
 	if err != nil {
-		log.Fatal(err)
+		logrus.Fatalln(err)
 	}
-	req.Header.Add("Authorization", "apikey "+api.Token)
+	req.Header.Add("Authorization", api.Authorization)
 	req.Header.Add("Content-Type", "binary/octet-stream")
 	req.Header.Add("x-filename", filepath.Base(path))
 	if len(headers) > 0 {
@@ -89,16 +90,16 @@ func (api *API) ScanFile(path string, headers []string) (string, error) {
 	}
 	resp, err := api.Client.Do(req)
 	if err != nil {
-		log.Fatal(err)
+		logrus.Fatalln(err)
 	}
 	var s = new(ScanResponse)
 	err = json.NewDecoder(resp.Body).Decode(&s)
 	defer resp.Body.Close()
 	if err != nil {
-		log.Fatal(err)
+		logrus.Fatalln(err)
 	}
 	if s.Success == false {
-		log.Fatal(resp.Status)
+		logrus.WithField("status_code", resp.StatusCode).Fatalln(resp.Status)
 	}
 
 	var jsonResult string
@@ -119,7 +120,10 @@ func (api *API) ScanFile(path string, headers []string) (string, error) {
 				jsonResult = string(response)
 				go func() { done <- true }()
 			}
-			log.Printf("progress for %s: %d \n", s.Data.DataID, result.Data.ScanResults.ProgressPercentage)
+			logrus.WithFields(logrus.Fields{
+				"data_id":  s.Data.DataID,
+				"progress": result.Data.ScanResults.ProgressPercentage,
+			}).Info("Scan progress")
 		case <-done:
 			close(done)
 			return jsonResult, nil
@@ -130,16 +134,16 @@ func (api *API) ScanFile(path string, headers []string) (string, error) {
 // ResultsByDataID by data_id
 func (api *API) ResultsByDataID(dataID string) (string, error) {
 	url := fmt.Sprintf("%s/file/%s", api.URL, dataID)
-	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Add("Authorization", "apikey "+api.Token)
+	req, _ := http.NewRequest(http.MethodGet, url, nil)
+	req.Header.Add("Authorization", api.Authorization)
 	return fmtResponse(api.Client.Do(req))
 }
 
 // RescanFile by file_id
 func (api *API) RescanFile(fileID string) (string, error) {
 	url := fmt.Sprintf("%s/file/%s/rescan", api.URL, fileID)
-	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Add("Authorization", "apikey "+api.Token)
+	req, _ := http.NewRequest(http.MethodGet, url, nil)
+	req.Header.Add("Authorization", api.Authorization)
 	return fmtResponse(api.Client.Do(req))
 }
 
@@ -148,8 +152,8 @@ func (api *API) RescanFiles(fileIDs []string) (string, error) {
 	url := fmt.Sprintf("%s/file/rescan", api.URL)
 	payload := &RescanReq{FileIDs: fileIDs}
 	j, _ := json.Marshal(payload)
-	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(j))
-	req.Header.Add("Authorization", "apikey "+api.Token)
+	req, _ := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(j))
+	req.Header.Add("Authorization", api.Authorization)
 	req.Header.Add("content-type", "application/json")
 	return fmtResponse(api.Client.Do(req))
 }
@@ -157,8 +161,8 @@ func (api *API) RescanFiles(fileIDs []string) (string, error) {
 // GetSanitizedLink Retrieve the download link for a sanitized file
 func (api *API) GetSanitizedLink(fileID string) (string, error) {
 	url := fmt.Sprintf("%s/file/%s/sanitizedLink", api.URL, fileID)
-	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Add("Authorization", "apikey "+api.Token)
+	req, _ := http.NewRequest(http.MethodGet, url, nil)
+	req.Header.Add("Authorization", api.Authorization)
 	return fmtResponse(api.Client.Do(req))
 }
 
@@ -168,7 +172,7 @@ func (api *API) FindOrScan(path, hash string, headers []string) (string, error) 
 	strRes, _ := api.HashDetails(hash)
 	json.NewDecoder(strings.NewReader(strRes)).Decode(&result)
 	if result.Success == false {
-		log.Println("Hash not found sending to scan")
+		logrus.WithField("hash", hash).Info("Hash not found sending to scan")
 		return api.ScanFile(path, headers)
 	}
 	return strRes, nil

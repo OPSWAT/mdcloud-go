@@ -58,8 +58,8 @@ type HashLookupReq struct {
 // HashDetails by file_id
 func (api *API) HashDetails(hash string) (string, error) {
 	url := fmt.Sprintf("%s/hash/%s", api.URL, hash)
-	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Add("Authorization", "apikey "+api.Token)
+	req, _ := http.NewRequest(http.MethodGet, url, nil)
+	req.Header.Add("Authorization", api.Authorization)
 	return fmtResponse(api.Client.Do(req))
 }
 
@@ -68,8 +68,8 @@ func (api *API) HashesDetails(hashes []string) (string, error) {
 	url := fmt.Sprintf("%s/hash", api.URL)
 	payload := &HashLookupReq{Hashes: hashes}
 	j, _ := json.Marshal(payload)
-	req, _ := http.NewRequest("POST", url, bytes.NewBuffer(j))
-	req.Header.Add("Authorization", "apikey "+api.Token)
+	req, _ := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(j))
+	req.Header.Add("Authorization", api.Authorization)
 	req.Header.Add("content-type", "application/json")
 	return fmtResponse(api.Client.Do(req))
 }
@@ -85,7 +85,7 @@ func (api *API) HashVulnerabilities(hash string, limit, offset int) (string, err
 		q.Set("offset", strconv.Itoa(offset))
 	}
 	url.RawQuery = q.Encode()
-	req, _ := http.NewRequest("GET", url.String(), nil)
-	req.Header.Add("Authorization", "apikey "+api.Token)
+	req, _ := http.NewRequest(http.MethodGet, url.String(), nil)
+	req.Header.Add("Authorization", api.Authorization)
 	return fmtResponse(api.Client.Do(req))
 }

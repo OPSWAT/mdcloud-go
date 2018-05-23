@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"math"
 	"net/http"
 	"os"
@@ -13,6 +12,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/sirupsen/logrus"
 
 	"github.com/OPSWAT/mdcloud-go/api"
 
@@ -42,9 +43,6 @@ type Response struct {
 	} `json:"data"`
 }
 
-// Apikey used
-var Apikey string
-
 var (
 	token  string
 	ips    []string
@@ -53,8 +51,8 @@ var (
 )
 
 // ScanSGs starts scan for users AWS SGs
-func ScanSGs(sgs []string) {
-	url := api.URL + "ip"
+func ScanSGs(api api.API, sgs []string) {
+	url := fmt.Sprintf("%s/ip", api.URL)
 	if sgs != nil {
 		getGroups(sgs)
 	} else {
@@ -67,7 +65,7 @@ func ScanSGs(sgs []string) {
 		}
 	}
 	if len(ips) == 0 {
-		log.Printf("security group empty")
+		logrus.Warningln("security group empty")
 		os.Exit(1)
 	}
 
@@ -82,20 +80,19 @@ func ScanSGs(sgs []string) {
 
 	for i := 0; i < len(ips); i += 5 {
 		batch := ips[i:int(math.Min(float64(i+5), float64(len(ips))))]
-		go func(batch []string, url string, token string, wg *sync.WaitGroup) {
+		go func(batch []string, url string, wg *sync.WaitGroup) {
 			mips, err := json.Marshal(&Request{Address: batch})
 			if err != nil {
 				errc <- err
 			}
-			req, err := http.NewRequest("POST", url, bytes.NewBuffer(mips))
+			req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(mips))
 			if err != nil {
 				errc <- err
 			}
-			req.Header.Set("authorization", "apikey "+token)
+			req.Header.Set("Authorization", api.Authorization)
 			req.Header.Set("Content-Type", "application/json")
 
-			client := &http.Client{Timeout: 5 * time.Minute}
-			resp, err := client.Do(req)
+			resp, err := api.Client.Do(req)
 			if err != nil {
 				errc <- errors.WithMessage(err, "request error")
 			}
@@ -106,13 +103,17 @@ func ScanSGs(sgs []string) {
 					if e := json.Unmarshal(body, &rp); e != nil {
 						errc <- errors.New("parsing response")
 					}
-					log.Fatalln(fmt.Sprintf("error: %v - %s while scanning batch %s", rp.Error.Code, strings.Join(rp.Error.Messages, " "), strings.Join(batch, ",")))
+					logrus.WithFields(logrus.Fields{
+						"code":  rp.Error.Code,
+						"msg":   strings.Join(rp.Error.Messages, " "),
+						"batch": strings.Join(batch, ","),
+					}).Fatalln(resp.Status)
 				}
 			} else {
 				if remaining, err := strconv.Atoi(resp.Header.Get("x-ratelimit-remaining")); err == nil {
 					if remaining > 0 {
 						for _, item := range batch {
-							fmt.Println(item + " : OK")
+							logrus.WithField("ip", item).Infoln("OK")
 						}
 					} else {
 						errc <- errors.New("limit reached")
@@ -121,7 +122,7 @@ func ScanSGs(sgs []string) {
 			}
 			time.Sleep(5 * time.Second)
 			defer wg.Done()
-		}(batch, url, Apikey, &wg)
+		}(batch, url, &wg)
 	}
 
 	go func() {
@@ -133,7 +134,7 @@ func ScanSGs(sgs []string) {
 	case <-done:
 	case err := <-errc:
 		if err != nil {
-			fmt.Println("error: ", err)
+			logrus.Errorln(err)
 			return
 		}
 	}
@@ -141,7 +142,7 @@ func ScanSGs(sgs []string) {
 
 // ListIPs starts scan for users AWS SGs
 func ListIPs(sgs []string) {
-	if sgs != nil {
+	if sgs != nil && len(sgs) > 0 {
 		getGroups(sgs)
 	} else {
 		getGroups(nil)
@@ -153,13 +154,12 @@ func ListIPs(sgs []string) {
 		}
 	}
 	if len(ips) == 0 {
-		fmt.Println("security group empty")
-		os.Exit(1)
+		logrus.Fatalln(errors.New("Security group empty"))
 	}
 
 	// TODO: display security groups before
 	for _, ip := range ips {
-		fmt.Println(ip)
+		logrus.Infoln(ip)
 	}
 }
 
@@ -183,6 +183,6 @@ func getGroups(sgs []string) {
 		groups, err = svc.DescribeSecurityGroups(&ec2.DescribeSecurityGroupsInput{})
 	}
 	if err != nil {
-		log.Fatalf("Error requesting group description: %v", err)
+		logrus.WithField("security_groups", sgs).Fatalln(errors.WithMessage(err, "Error requesting group description"))
 	}
 }

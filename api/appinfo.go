@@ -8,7 +8,7 @@ import (
 // HashAppinfo by file_id
 func (api *API) HashAppinfo(hash string) (string, error) {
 	url := fmt.Sprintf("%s/appinfo/%s", api.URL, hash)
-	req, _ := http.NewRequest("GET", url, nil)
-	req.Header.Add("Authorization", "apikey "+api.Token)
+	req, _ := http.NewRequest(http.MethodGet, url, nil)
+	req.Header.Add("Authorization", api.Authorization)
 	return fmtResponse(api.Client.Do(req))
 }

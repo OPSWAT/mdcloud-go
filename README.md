@@ -67,13 +67,14 @@ Available Commands:
   sanitized     Sanitized result by file_id
   scan          Scan file or path
   sglist        List security groups IPs
-  sgscan        Scan security groups using IP Scan API
-  version       Print the version number of mdcloud-go
+  sgscan        Scan security groups using IP scan API
+  version       Print the version number of mdcloud
   vulnerability Vulnerability for hash
 
 Flags:
-  -a, --apikey string   apikey token (default is MDCLOUD_APIKEY env variable)
-  -h, --help            help for mdcloud
+  -a, --apikey string      set apikey token (default is MDCLOUD_APIKEY env variable)
+  -f, --formatter string   set formatter type to text, json or raw (default "text")
+  -h, --help               help for mdcloud
 
 Use "mdcloud [command] --help" for more information about a command.
 ```

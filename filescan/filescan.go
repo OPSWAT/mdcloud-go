@@ -3,12 +3,12 @@ package filescan
 import (
 	"crypto/sha1"
 	"encoding/hex"
-	"fmt"
 	"io"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/sirupsen/logrus"
 
 	"github.com/OPSWAT/mdcloud-go/api"
 	"github.com/fsnotify/fsnotify"
@@ -21,16 +21,16 @@ func Scan(api api.API, path []string, watch bool, headers []string) {
 	if path != nil && len(path) > 0 {
 		fi, err := os.Stat(path[0])
 		if err != nil {
-			log.Fatal(err)
+			logrus.Fatalln(err)
 		}
 		switch mode := fi.Mode(); {
 		case mode.IsDir():
 			watchDirScan(api, path[0], headers)
 		case mode.IsRegular():
 			if res, err := api.ScanFile(path[0], headers); err == nil {
-				fmt.Println(res)
+				logrus.Println(res)
 			} else {
-				log.Fatalln(err)
+				logrus.Fatalln(err)
 			}
 		}
 	}
@@ -41,7 +41,7 @@ func watchDirScan(api api.API, path string, headers []string) {
 	defer watcher.Close()
 
 	if err := filepath.Walk(path, watchDir); err != nil {
-		log.Fatalln("Error adding to watcher: ", err)
+		logrus.Fatalln(err)
 	}
 
 	done := make(chan bool)
@@ -50,20 +50,20 @@ func watchDirScan(api api.API, path string, headers []string) {
 			select {
 			case event := <-watcher.Events:
 				if (event.Op == fsnotify.Write) || (event.Op == fsnotify.Create) {
-					log.Println(event.Op, event.Name)
+					logrus.WithFields(logrus.Fields{"op": event.Op, "type": event.Name}).Infoln("Change detected")
 					resSha1, err := getFileSha1(event.Name)
 					if err != nil {
 						api.ScanFile(event.Name, headers)
 					} else {
 						if res, err := api.FindOrScan(event.Name, resSha1, headers); err == nil {
-							fmt.Println(res)
+							logrus.Println(res)
 						} else {
-							log.Fatalln(err)
+							logrus.Fatalln(err)
 						}
 					}
 				}
 			case err := <-watcher.Errors:
-				log.Fatal(err)
+				logrus.Fatalln(err)
 			}
 		}
 	}()

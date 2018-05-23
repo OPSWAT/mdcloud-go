@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -8,19 +9,19 @@ import (
 
 // API struct containing main details
 type API struct {
-	URL    string
-	Token  string
-	Client *http.Client
+	URL           string
+	Token         string
+	Client        *http.Client
+	Authorization string
 }
 
 // URL for API
-const URL = "https://api.metadefender.com/v3"
+const mainURL = "https://api.metadefender.com/v3"
 
 // NewAPI object
 func NewAPI(apikey string) API {
-	return API{Token: apikey, URL: URL, Client: &http.Client{
-		Timeout: 300 * time.Second,
-	}}
+	return API{Token: apikey, Authorization: fmt.Sprintf("apikey %s", apikey), URL: mainURL,
+		Client: &http.Client{Timeout: 2 * time.Minute}}
 }
 
 func fmtResponse(resp *http.Response, err error) (string, error) {

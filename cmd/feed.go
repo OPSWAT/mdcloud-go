@@ -22,6 +22,6 @@ var feedCmd = &cobra.Command{
 func init() {
 	RootCmd.AddCommand(feedCmd)
 	feedCmd.PersistentFlags().IntVarP(&page, "page", "p", 0, "get specific page")
-	feedCmd.PersistentFlags().StringVarP(&engine, "engine", "e", "", "false positives for specific engine")
-	feedCmd.PersistentFlags().StringVarP(&fmtType, "type", "t", "", "format type for infected (json, csv, bro)")
+	feedCmd.PersistentFlags().StringVarP(&engine, "engine", "e", "", "get false positives for specific engine")
+	feedCmd.PersistentFlags().StringVarP(&fmtType, "type", "t", "json", "set format type for infected: json, csv or bro")
 }
