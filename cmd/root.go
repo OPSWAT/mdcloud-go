@@ -38,11 +38,17 @@ var RootCmd = &cobra.Command{
 // Execute adds all child commands to the root command and sets flags appropriately.
 func Execute(version string) {
 	VERSION = version
-	if result, ok := os.LookupEnv("MDCLOUD_APIKEY"); ok {
-		API = api.NewAPI(result)
+	if apikey == "" {
+		var ok bool
+		if apikey, ok = os.LookupEnv("MDCLOUD_APIKEY"); ok && apikey != "" {
+			API = api.NewAPI(apikey)
+		} else {
+			logrus.Fatalln(errors.New("Apikey not set, please specify token while calling or set the environment variable"))
+		}
 	} else {
-		logrus.Fatalln(errors.New("Apikey not set, please specify token while calling or set the environment variable"))
+		API = api.NewAPI(apikey)
 	}
+
 	if err := RootCmd.Execute(); err != nil {
 		logrus.Fatalln(err)
 		os.Exit(1)
