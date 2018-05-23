@@ -1,9 +1,6 @@
 package filescan
 
 import (
-	"crypto/sha1"
-	"encoding/hex"
-	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -11,13 +8,14 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/OPSWAT/mdcloud-go/api"
+	"github.com/OPSWAT/mdcloud-go/utils"
 	"github.com/fsnotify/fsnotify"
 )
 
 var watcher *fsnotify.Watcher
 
 // Scan or watches files or path
-func Scan(api api.API, path []string, watch bool, headers []string) {
+func Scan(api api.API, path, headers []string, watch, lookupFile bool) {
 	if path != nil && len(path) > 0 {
 		fi, err := os.Stat(path[0])
 		if err != nil {
@@ -27,10 +25,14 @@ func Scan(api api.API, path []string, watch bool, headers []string) {
 		case mode.IsDir():
 			watchDirScan(api, path[0], headers)
 		case mode.IsRegular():
-			if res, err := api.ScanFile(path[0], headers); err == nil {
-				logrus.Println(res)
+			if !lookupFile {
+				if res, err := api.ScanFile(path[0], headers); err == nil {
+					logrus.Println(res)
+				} else {
+					logrus.Fatalln(err)
+				}
 			} else {
-				logrus.Fatalln(err)
+				lookupSha1(api, path[0], headers)
 			}
 		}
 	}
@@ -51,16 +53,7 @@ func watchDirScan(api api.API, path string, headers []string) {
 			case event := <-watcher.Events:
 				if (event.Op == fsnotify.Write) || (event.Op == fsnotify.Create) {
 					logrus.WithFields(logrus.Fields{"op": event.Op, "type": event.Name}).Infoln("Change detected")
-					resSha1, err := getFileSha1(event.Name)
-					if err != nil {
-						api.ScanFile(event.Name, headers)
-					} else {
-						if res, err := api.FindOrScan(event.Name, resSha1, headers); err == nil {
-							logrus.Println(res)
-						} else {
-							logrus.Fatalln(err)
-						}
-					}
+					lookupSha1(api, event.Name, headers)
 				}
 			case err := <-watcher.Errors:
 				logrus.Fatalln(err)
@@ -76,18 +69,15 @@ func watchDir(path string, fi os.FileInfo, err error) error {
 	return nil
 }
 
-func getFileSha1(filePath string) (string, error) {
-	var resSha1 string
-	file, err := os.Open(filePath)
+func lookupSha1(api api.API, path string, headers []string) {
+	resSha1, err := utils.GetFileSha1(path)
 	if err != nil {
-		return resSha1, err
+		api.ScanFile(path, headers)
+	} else {
+		if res, err := api.FindOrScan(path, resSha1, headers); err == nil {
+			logrus.Println(res)
+		} else {
+			logrus.Fatalln(err)
+		}
 	}
-	defer file.Close()
-	hash := sha1.New()
-	if _, err := io.Copy(hash, file); err != nil {
-		return resSha1, err
-	}
-	hashInBytes := hash.Sum(nil)[:20]
-	resSha1 = hex.EncodeToString(hashInBytes)
-	return resSha1, nil
 }

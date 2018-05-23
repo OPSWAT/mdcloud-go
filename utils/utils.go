@@ -1,5 +1,12 @@
 package utils
 
+import (
+	"crypto/sha1"
+	"encoding/hex"
+	"io"
+	"os"
+)
+
 // StringInSlice checks for string in slice
 func StringInSlice(str string, list []string) bool {
 	for _, v := range list {
@@ -27,4 +34,21 @@ func IsLetter(s string) bool {
 		}
 	}
 	return true
+}
+
+// GetFileSha1 returns file sha1
+func GetFileSha1(filePath string) (string, error) {
+	var resSha1 string
+	file, err := os.Open(filePath)
+	if err != nil {
+		return resSha1, err
+	}
+	defer file.Close()
+	hash := sha1.New()
+	if _, err := io.Copy(hash, file); err != nil {
+		return resSha1, err
+	}
+	hashInBytes := hash.Sum(nil)[:20]
+	resSha1 = hex.EncodeToString(hashInBytes)
+	return resSha1, nil
 }

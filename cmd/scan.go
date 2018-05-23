@@ -10,6 +10,7 @@ var path string
 var watcher bool
 var requestHeaders []string
 var sanitization bool
+var lookupFile bool
 
 // scanCmd represents the scan command
 var scanCmd = &cobra.Command{
@@ -20,7 +21,7 @@ var scanCmd = &cobra.Command{
 		if sanitization == true {
 			requestHeaders = append(requestHeaders, "x-rule=sanitize_docs")
 		}
-		filescan.Scan(API, args, watcher, requestHeaders)
+		filescan.Scan(API, args, requestHeaders, watcher, lookupFile)
 	},
 }
 
@@ -29,4 +30,5 @@ func init() {
 	scanCmd.PersistentFlags().BoolVarP(&watcher, "watch", "w", false, "watches files under a path for changes & sends them to scan")
 	scanCmd.PersistentFlags().BoolVarP(&sanitization, "sanitize", "s", false, "enable sanitization header")
 	scanCmd.PersistentFlags().StringArrayVarP(&requestHeaders, "request-headers", "r", nil, "comma separated additional headers")
+	scanCmd.PersistentFlags().BoolVarP(&lookupFile, "lookup", "l", false, "lookup sha1 before scanning one file")
 }
