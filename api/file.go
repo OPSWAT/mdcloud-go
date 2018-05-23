@@ -68,7 +68,7 @@ type DataIDResponse struct {
 }
 
 // ScanFile sends to API
-func (api *API) ScanFile(path string, headers []string) (string, error) {
+func (api *API) ScanFile(path string, headers []string, poll bool) (string, error) {
 	url := fmt.Sprintf("%s/file", api.URL)
 	file, err := os.Open(path)
 	if err != nil {
@@ -101,7 +101,14 @@ func (api *API) ScanFile(path string, headers []string) (string, error) {
 	if s.Success == false {
 		logrus.WithField("status_code", resp.StatusCode).Fatalln(resp.Status)
 	}
-
+	if !poll {
+		logrus.WithField("data_id", s.Data.DataID).Infoln("Result data_id")
+		if r, e := json.Marshal(s); e == nil {
+			return string(r), nil
+		} else {
+			return "", e
+		}
+	}
 	var jsonResult string
 	ticker := time.NewTicker(2 * time.Second)
 	defer ticker.Stop()
@@ -167,13 +174,13 @@ func (api *API) GetSanitizedLink(fileID string) (string, error) {
 }
 
 // FindOrScan file by hash
-func (api *API) FindOrScan(path, hash string, headers []string) (string, error) {
+func (api *API) FindOrScan(path, hash string, headers []string, poll bool) (string, error) {
 	result := new(HashLookupResp)
 	strRes, _ := api.HashDetails(hash)
 	json.NewDecoder(strings.NewReader(strRes)).Decode(&result)
 	if result.Success == false {
 		logrus.WithField("hash", hash).Info("Hash not found sending to scan")
-		return api.ScanFile(path, headers)
+		return api.ScanFile(path, headers, poll)
 	}
 	return strRes, nil
 }
