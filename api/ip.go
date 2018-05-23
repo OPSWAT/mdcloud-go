@@ -15,8 +15,11 @@ type IPLookupReq struct {
 // IPDetails by file_id
 func (api *API) IPDetails(ip string) (string, error) {
 	url := fmt.Sprintf("%s/ip/%s", api.URL, ip)
-	req, _ := http.NewRequest(http.MethodGet, url, nil)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	req.Header.Add("Authorization", api.Authorization)
+	if err != nil {
+		return "", err
+	}
 	return fmtResponse(api.Client.Do(req))
 }
 
@@ -25,8 +28,11 @@ func (api *API) IPsDetails(address []string) (string, error) {
 	url := fmt.Sprintf("%s/ip", api.URL)
 	payload := &IPLookupReq{Address: address}
 	j, _ := json.Marshal(payload)
-	req, _ := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(j))
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(j))
 	req.Header.Add("Authorization", api.Authorization)
+	if err != nil {
+		return "", err
+	}
 	req.Header.Add("content-type", "application/json")
 	return fmtResponse(api.Client.Do(req))
 }

@@ -19,7 +19,10 @@ func (api *API) GetFalsePositivesFeed(engine string, page int) (string, error) {
 		q.Set("page", strconv.Itoa(page))
 	}
 	url.RawQuery = q.Encode()
-	req, _ := http.NewRequest(http.MethodGet, url.String(), nil)
+	req, err := http.NewRequest(http.MethodGet, url.String(), nil)
+	if err != nil {
+		return "", err
+	}
 	req.Header.Add("Authorization", api.Authorization)
 	return fmtResponse(api.Client.Do(req))
 }
@@ -40,7 +43,10 @@ func (api *API) GetInfectedHashesFeed(fmtType string, page int) (string, error) 
 		q.Set("page", strconv.Itoa(page))
 	}
 	url.RawQuery = q.Encode()
-	req, _ := http.NewRequest(http.MethodGet, url.String(), nil)
+	req, err := http.NewRequest(http.MethodGet, url.String(), nil)
+	if err != nil {
+		return "", err
+	}
 	req.Header.Add("Authorization", api.Authorization)
 	return fmtResponse(api.Client.Do(req))
 }
@@ -53,7 +59,10 @@ func (api *API) GetHashesFeed(page int) (string, error) {
 		q.Set("page", strconv.Itoa(page))
 	}
 	url.RawQuery = q.Encode()
-	req, _ := http.NewRequest(http.MethodGet, url.String(), nil)
+	req, err := http.NewRequest(http.MethodGet, url.String(), nil)
+	if err != nil {
+		return "", err
+	}
 	req.Header.Add("Authorization", api.Authorization)
 	return fmtResponse(api.Client.Do(req))
 }
@@ -61,7 +70,10 @@ func (api *API) GetHashesFeed(page int) (string, error) {
 // GetHashDownloadLink Retrieve the download link for a specific file. Any of the md5, sha1 and sha256 hashes can be used for downloading the file. This endpoint must be called for each file.
 func (api *API) GetHashDownloadLink(hash string) (string, error) {
 	url := fmt.Sprintf("%s/file/%s/download", api.URL, hash)
-	req, _ := http.NewRequest(http.MethodGet, url, nil)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return "", err
+	}
 	req.Header.Add("Authorization", api.Authorization)
 	return fmtResponse(api.Client.Do(req))
 }

@@ -13,11 +13,15 @@ var scanCmd = &cobra.Command{
 	Short: "Scan file or path",
 	Long:  "Scan file or path, all folder etc.",
 	Run: func(cmd *cobra.Command, args []string) {
-		options.Path = args
-		if options.Sanitization == true {
-			options.Headers = append(options.Headers, "x-rule=sanitize_docs")
+		if len(args) > 0 {
+			options.Path = args
+			if options.Sanitization == true {
+				options.Headers = append(options.Headers, "x-rule=sanitize_docs")
+			}
+			filescan.Scan(API, *options)
+		} else {
+			cmd.Help()
 		}
-		filescan.Scan(API, *options)
 	},
 }
 
@@ -28,5 +32,5 @@ func init() {
 	scanCmd.PersistentFlags().BoolVarP(&options.Sanitization, "sanitize", "s", false, "enable sanitization header")
 	scanCmd.PersistentFlags().StringArrayVarP(&options.Headers, "request-headers", "r", nil, "comma separated additional headers")
 	scanCmd.PersistentFlags().BoolVarP(&options.LookupFile, "lookup", "l", false, "lookup sha1 before scanning one file")
-	scanCmd.PersistentFlags().BoolVarP(&options.Poll, "poll", "p", false, "poll for result")
+	scanCmd.PersistentFlags().BoolVarP(&options.Poll, "poll", "p", true, "poll for result")
 }

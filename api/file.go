@@ -72,12 +72,14 @@ func (api *API) ScanFile(path string, headers []string, poll bool) (string, erro
 	url := fmt.Sprintf("%s/file", api.URL)
 	file, err := os.Open(path)
 	if err != nil {
-		logrus.Fatalln(err)
+		logrus.Errorln(err)
+		return "", err
 	}
 	defer file.Close()
 	req, err := http.NewRequest(http.MethodPost, url, file)
 	if err != nil {
-		logrus.Fatalln(err)
+		logrus.Errorln(err)
+		return "", err
 	}
 	req.Header.Add("Authorization", api.Authorization)
 	req.Header.Add("Content-Type", "binary/octet-stream")
@@ -90,22 +92,26 @@ func (api *API) ScanFile(path string, headers []string, poll bool) (string, erro
 	}
 	resp, err := api.Client.Do(req)
 	if err != nil {
-		logrus.Fatalln(err)
+		logrus.Errorln(err)
+		return "", err
 	}
 	var s = new(ScanResponse)
 	err = json.NewDecoder(resp.Body).Decode(&s)
 	defer resp.Body.Close()
 	if err != nil {
-		logrus.Fatalln(err)
+		logrus.Errorln(err)
+		return "", err
 	}
 	if s.Success == false {
-		logrus.WithField("status_code", resp.StatusCode).Fatalln(resp.Status)
+		logrus.WithField("status_code", resp.StatusCode).Errorln(resp.Status)
+		return "", nil
 	}
 	if !poll {
 		logrus.WithField("data_id", s.Data.DataID).Infoln("Result data_id")
 		if r, e := json.Marshal(s); e == nil {
 			return string(r), nil
 		} else {
+			logrus.Errorln(err)
 			return "", e
 		}
 	}
@@ -141,7 +147,10 @@ func (api *API) ScanFile(path string, headers []string, poll bool) (string, erro
 // ResultsByDataID by data_id
 func (api *API) ResultsByDataID(dataID string) (string, error) {
 	url := fmt.Sprintf("%s/file/%s", api.URL, dataID)
-	req, _ := http.NewRequest(http.MethodGet, url, nil)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return "", err
+	}
 	req.Header.Add("Authorization", api.Authorization)
 	return fmtResponse(api.Client.Do(req))
 }
@@ -149,7 +158,10 @@ func (api *API) ResultsByDataID(dataID string) (string, error) {
 // RescanFile by file_id
 func (api *API) RescanFile(fileID string) (string, error) {
 	url := fmt.Sprintf("%s/file/%s/rescan", api.URL, fileID)
-	req, _ := http.NewRequest(http.MethodGet, url, nil)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return "", err
+	}
 	req.Header.Add("Authorization", api.Authorization)
 	return fmtResponse(api.Client.Do(req))
 }
@@ -159,7 +171,10 @@ func (api *API) RescanFiles(fileIDs []string) (string, error) {
 	url := fmt.Sprintf("%s/file/rescan", api.URL)
 	payload := &RescanReq{FileIDs: fileIDs}
 	j, _ := json.Marshal(payload)
-	req, _ := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(j))
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(j))
+	if err != nil {
+		return "", err
+	}
 	req.Header.Add("Authorization", api.Authorization)
 	req.Header.Add("content-type", "application/json")
 	return fmtResponse(api.Client.Do(req))
@@ -168,13 +183,19 @@ func (api *API) RescanFiles(fileIDs []string) (string, error) {
 // GetSanitizedLink Retrieve the download link for a sanitized file
 func (api *API) GetSanitizedLink(fileID string) (string, error) {
 	url := fmt.Sprintf("%s/file/%s/sanitizedLink", api.URL, fileID)
-	req, _ := http.NewRequest(http.MethodGet, url, nil)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return "", err
+	}
 	req.Header.Add("Authorization", api.Authorization)
 	return fmtResponse(api.Client.Do(req))
 }
 
 // FindOrScan file by hash
 func (api *API) FindOrScan(path, hash string, headers []string, poll bool) (string, error) {
+	if !poll {
+		return api.ScanFile(path, headers, poll)
+	}
 	result := new(HashLookupResp)
 	strRes, _ := api.HashDetails(hash)
 	json.NewDecoder(strings.NewReader(strRes)).Decode(&result)

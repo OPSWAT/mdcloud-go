@@ -2,6 +2,7 @@ package filescan
 
 import (
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -27,7 +28,16 @@ var watcher *fsnotify.Watcher
 // Scan or watches files or path
 func Scan(api api.API, options ScanOptions) {
 	if options.Path != nil && len(options.Path) > 0 {
-		fi, err := os.Stat(options.Path[0])
+		fname := options.Path[0]
+		if !path.IsAbs(fname) {
+			wd, err := os.Getwd()
+			if err != nil {
+				logrus.Panicln(err)
+			}
+			fname = path.Clean(path.Join(wd, fname))
+			options.Path[0] = fname
+		}
+		fi, err := os.Stat(fname)
 		if err != nil {
 			logrus.Fatalln(err)
 		}
@@ -36,13 +46,13 @@ func Scan(api api.API, options ScanOptions) {
 			watchScan(api, options)
 		case mode.IsRegular():
 			if !options.LookupFile {
-				if res, err := api.ScanFile(options.Path[0], options.Headers, options.Poll); err == nil {
+				if res, err := api.ScanFile(fname, options.Headers, options.Poll); err == nil {
 					logrus.Println(res)
 				} else {
 					logrus.Fatalln(err)
 				}
 			} else {
-				lookupSHA1(api, options.Path[0], options)
+				lookupSHA1(api, fname, options)
 			}
 		}
 	}
@@ -61,9 +71,9 @@ func watchScan(api api.API, options ScanOptions) {
 		for {
 			select {
 			case event := <-watcher.Events:
-				if (event.Op == fsnotify.Write) || (event.Op == fsnotify.Create) {
+				if !strings.Contains(event.Name, "/.") && ((event.Op == fsnotify.Write) || (event.Op == fsnotify.Create)) {
 					logrus.WithFields(logrus.Fields{"op": event.Op, "type": event.Name}).Infoln("Change detected")
-					lookupSHA1(api, event.Name, options)
+					go lookupSHA1(api, event.Name, options)
 				}
 			case err := <-watcher.Errors:
 				logrus.Fatalln(err)
@@ -80,14 +90,12 @@ func lookupSHA1(api api.API, filePath string, options ScanOptions) {
 	} else {
 		if res, err := api.FindOrScan(filePath, resSha1, options.Headers, options.Poll); err == nil {
 			logrus.Println(res)
-		} else {
-			logrus.Fatalln(err)
 		}
 	}
 }
 
 func addPaths(path string, fi os.FileInfo, err error) error {
-	if fi.Mode().IsDir() && !strings.HasPrefix(fi.Name(), ".") {
+	if fi.Mode().IsDir() && !strings.Contains(path, "/.") {
 		return watcher.Add(path)
 	}
 	return nil

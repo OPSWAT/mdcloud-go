@@ -8,7 +8,10 @@ import (
 // GetCVEs lists all CVEs
 func (api *API) GetCVEs() (string, error) {
 	url := fmt.Sprintf("%s/cve", api.URL)
-	req, _ := http.NewRequest(http.MethodGet, url, nil)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return "", err
+	}
 	req.Header.Add("Authorization", api.Authorization)
 	return fmtResponse(api.Client.Do(req))
 }
@@ -24,7 +27,10 @@ func (api *API) GetCVEDetails(CVE, property string) (string, error) {
 	case "hashes":
 		apiurl += "/hashes"
 	}
-	req, _ := http.NewRequest(http.MethodGet, apiurl, nil)
+	req, err := http.NewRequest(http.MethodGet, apiurl, nil)
+	if err != nil {
+		return "", err
+	}
 	req.Header.Add("Authorization", api.Authorization)
 	return fmtResponse(api.Client.Do(req))
 }
