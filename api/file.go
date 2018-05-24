@@ -28,6 +28,10 @@ type ScanResponse struct {
 		InQueue       int    `json:"in_queue"`
 		QueuePriority string `json:"queue_priority"`
 	} `json:"data"`
+	Error struct {
+		Code     int      `json:"code"`
+		Messages []string `json:"messages"`
+	} `json:"error"`
 }
 
 // DataIDResponse used for polling result
@@ -103,7 +107,7 @@ func (api *API) ScanFile(path string, headers []string, poll bool) (string, erro
 		return "", err
 	}
 	if s.Success == false {
-		logrus.WithField("status_code", resp.StatusCode).Errorln(resp.Status)
+		logrus.WithFields(logrus.Fields{"status_code": resp.StatusCode, "error_code": s.Error.Code, "error_message": strings.Join(s.Error.Messages, ",")}).Errorln(resp.Status)
 		return "", nil
 	}
 	if !poll {
@@ -125,7 +129,7 @@ func (api *API) ScanFile(path string, headers []string, poll bool) (string, erro
 			result := new(DataIDResponse)
 			resDataID, err := api.ResultsByDataID(s.Data.DataID)
 			if err != nil {
-				return "", errors.New("failed to get results for: " + resDataID)
+				return "", errors.New("Failed to get results for: " + resDataID)
 			}
 			json.NewDecoder(strings.NewReader(resDataID)).Decode(&result)
 			if result.Data.ScanResults.ProgressPercentage == 100 {
@@ -192,8 +196,8 @@ func (api *API) GetSanitizedLink(fileID string) (string, error) {
 }
 
 // FindOrScan file by hash
-func (api *API) FindOrScan(path, hash string, headers []string, poll bool) (string, error) {
-	if !poll {
+func (api *API) FindOrScan(path, hash string, headers []string, lookup, poll bool) (string, error) {
+	if !lookup {
 		return api.ScanFile(path, headers, poll)
 	}
 	result := new(HashLookupResp)

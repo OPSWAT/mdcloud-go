@@ -84,12 +84,26 @@ func watchScan(api api.API, options ScanOptions) {
 }
 
 func lookupSHA1(api api.API, filePath string, options ScanOptions) {
-	resSha1, err := utils.GetFileSha1(filePath)
+	file, err := os.Open(filePath)
 	if err != nil {
-		api.ScanFile(filePath, options.Headers, options.Poll)
-	} else {
-		if res, err := api.FindOrScan(filePath, resSha1, options.Headers, options.Poll); err == nil {
-			logrus.Println(res)
+		logrus.Warningln("Failed to read file")
+		return
+	}
+	stat, err := file.Stat()
+	defer file.Close()
+	if err == nil {
+		if err := filepath.Walk(filePath, addPaths); err != nil {
+			logrus.Fatalln(err)
+		}
+	}
+	if !stat.IsDir() {
+		resSha1, err := utils.GetFileSHA1(filePath)
+		if err == nil {
+			if res, err := api.FindOrScan(filePath, resSha1, options.Headers, options.LookupFile, options.Poll); err == nil {
+				logrus.Println(res)
+			}
+		} else {
+			logrus.Println(api.ScanFile(filePath, options.Headers, options.Poll))
 		}
 	}
 }

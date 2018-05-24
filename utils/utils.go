@@ -5,6 +5,8 @@ import (
 	"encoding/hex"
 	"io"
 	"os"
+
+	"github.com/pkg/errors"
 )
 
 // StringInSlice checks for string in slice
@@ -36,17 +38,17 @@ func IsLetter(s string) bool {
 	return true
 }
 
-// GetFileSha1 returns file sha1
-func GetFileSha1(filePath string) (string, error) {
+// GetFileSHA1 returns file sha1
+func GetFileSHA1(filePath string) (string, error) {
 	var resSha1 string
 	file, err := os.Open(filePath)
 	if err != nil {
-		return resSha1, err
+		return "", errors.Wrap(err, "Failed to open file")
 	}
 	defer file.Close()
 	hash := sha1.New()
 	if _, err := io.Copy(hash, file); err != nil {
-		return resSha1, err
+		return "", err
 	}
 	hashInBytes := hash.Sum(nil)[:20]
 	resSha1 = hex.EncodeToString(hashInBytes)
