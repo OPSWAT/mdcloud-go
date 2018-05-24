@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"github.com/OPSWAT/mdcloud-go/aws"
 	"github.com/OPSWAT/mdcloud-go/ipscan"
+	"github.com/sirupsen/logrus"
 
 	"github.com/spf13/cobra"
 )
@@ -14,11 +16,18 @@ var sglistCmd = &cobra.Command{
 	Short: "List security groups IPs",
 	Long:  "List IPs from security groups associated with your AWS account based on your main credentials",
 	Run: func(cmd *cobra.Command, args []string) {
+		if aws.Session == nil {
+			aws.LoadProfile()
+			if _, err := aws.Session.Config.Credentials.Get(); err != nil {
+				logrus.Fatalln("Couldn't find AWS config under~/.aws/credentials")
+			}
+		}
 		if grps != nil {
 			ipscan.ListIPs(grps)
 		} else {
 			ipscan.ListIPs(nil)
 		}
+
 	},
 }
 

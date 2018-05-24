@@ -3,7 +3,6 @@ package main
 import (
 	"os"
 
-	"github.com/OPSWAT/mdcloud-go/aws"
 	"github.com/OPSWAT/mdcloud-go/cmd"
 	"github.com/sirupsen/logrus"
 )
@@ -17,6 +16,5 @@ func init() {
 }
 
 func main() {
-	aws.LoadProfile()
 	cmd.Execute(VERSION)
 }

@@ -14,7 +14,7 @@ var (
 func LoadProfile() {
 	Session = session.Must(session.NewSession())
 	if _, err := Session.Config.Credentials.Get(); err != nil {
-		logrus.Fatalln("Loading credentials, ensure credentials setup under ~/.aws/credentials")
+		logrus.Fatalln("Couldn't find AWS config under ~/.aws/credentials, it's required for security group scanning commands")
 	}
 
 	// defaults to us-west-2
