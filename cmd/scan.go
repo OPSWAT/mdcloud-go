@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/OPSWAT/mdcloud-go/filescan"
+	"github.com/OPSWAT/mdcloud-go/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -13,15 +14,13 @@ var scanCmd = &cobra.Command{
 	Short: "Scan file or path",
 	Long:  "Scan file or path, all folder etc.",
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) > 0 {
+		utils.VerifyArgsOrRun(args, 0, func() {
 			options.Path = args
 			if options.Sanitization == true {
 				options.Headers = append(options.Headers, "x-rule=sanitize_docs")
 			}
 			filescan.Scan(API, *options)
-		} else {
-			cmd.Help()
-		}
+		}, func() { cmd.Help() })
 	},
 }
 

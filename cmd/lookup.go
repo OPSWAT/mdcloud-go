@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/OPSWAT/mdcloud-go/lookup"
+	"github.com/OPSWAT/mdcloud-go/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -24,16 +25,14 @@ var lookupCmd = &cobra.Command{
 				hashes = append(hashes, arg)
 			}
 		}
-		if len(args) > 0 {
+		utils.VerifyArgsOrRun(args, 0, func() {
 			if len(ips) > 0 {
 				lookup.ByIP(API, ips)
 			}
 			if len(hashes) > 0 {
 				lookup.ByHash(API, hashes, download)
 			}
-		} else {
-			cmd.Help()
-		}
+		}, func() { cmd.Help() })
 	},
 }
 

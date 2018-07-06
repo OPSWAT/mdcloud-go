@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/OPSWAT/mdcloud-go/lookup"
+	"github.com/OPSWAT/mdcloud-go/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -11,11 +12,7 @@ var appinfoCmd = &cobra.Command{
 	Short: "Appinfo for hash",
 	Long:  "Appinfo for hash by sha1",
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) > 0 {
-			lookup.AppinfoByHash(API, args)
-		} else {
-			cmd.Help()
-		}
+		utils.VerifyArgsOrRun(args, 0, func() { lookup.AppinfoByHash(API, args) }, func() { cmd.Help() })
 	},
 }
 

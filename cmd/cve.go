@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"github.com/OPSWAT/mdcloud-go/cve"
+	"github.com/OPSWAT/mdcloud-go/utils"
 	"github.com/spf13/cobra"
 )
 
@@ -13,11 +14,7 @@ var cveCmd = &cobra.Command{
 	Short: "CVE lookup",
 	Long:  "Retrieve CVEs by name",
 	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) > 0 {
-			cve.Lookup(API, args[0], property)
-		} else {
-			cmd.Help()
-		}
+		utils.VerifyArgsOrRun(args, 0, func() { cve.Lookup(API, args[0], property) }, func() { cmd.Help() })
 	},
 }
 

@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
 // StringInSlice checks for string in slice
@@ -38,7 +39,7 @@ func IsLetter(s string) bool {
 	return true
 }
 
-// GetFileSHA1 returns file sha1
+// GetFileSHA1 returns a files SHA1
 func GetFileSHA1(filePath string) (string, error) {
 	var resSha1 string
 	file, err := os.Open(filePath)
@@ -53,4 +54,17 @@ func GetFileSHA1(filePath string) (string, error) {
 	hashInBytes := hash.Sum(nil)[:20]
 	resSha1 = hex.EncodeToString(hashInBytes)
 	return resSha1, nil
+}
+
+// VerifyArgsOrRun will check args length then call first defined function or 2nd to handle error
+func VerifyArgsOrRun(args []string, equalTo int, call ...func()) {
+	if len(args) > 0 || equalTo > 0 && len(args) == equalTo {
+		call[0]()
+	} else {
+		if call[1] != nil {
+			call[1]()
+		} else {
+			logrus.Fatalln("args count not valid")
+		}
+	}
 }
