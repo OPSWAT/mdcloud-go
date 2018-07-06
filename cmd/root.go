@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
 
@@ -38,15 +37,20 @@ var RootCmd = &cobra.Command{
 // Execute adds all child commands to the root command and sets flags appropriately.
 func Execute(version string) {
 	VERSION = version
+	var apikeyErr error
 	if apikey == "" {
 		var ok bool
 		if apikey, ok = os.LookupEnv("MDCLOUD_APIKEY"); ok && apikey != "" {
-			API = api.NewAPI(apikey)
+			API, apikeyErr = api.NewAPI(apikey)
 		} else {
-			logrus.Fatalln(errors.New("Apikey not set, please specify token while calling or set the environment variable"))
+			API, apikeyErr = api.NewAPI("")
 		}
 	} else {
-		API = api.NewAPI(apikey)
+		API, apikeyErr = api.NewAPI(apikey)
+	}
+
+	if apikeyErr != nil {
+		logrus.Fatalln(apikeyErr)
 	}
 
 	if err := RootCmd.Execute(); err != nil {

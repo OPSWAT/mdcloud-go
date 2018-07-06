@@ -68,3 +68,14 @@ func VerifyArgsOrRun(args []string, equalTo int, call ...func()) {
 		}
 	}
 }
+
+// FilterMap items from array based on test functions
+func FilterMap(ms map[string][]string, test func(string) bool) (ret map[string][]string) {
+	ret = make(map[string][]string)
+	for s, ss := range ms {
+		if test(s) {
+			ret[s] = ss
+		}
+	}
+	return
+}

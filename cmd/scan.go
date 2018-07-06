@@ -19,7 +19,7 @@ var scanCmd = &cobra.Command{
 			if options.Sanitization == true {
 				options.Headers = append(options.Headers, "x-rule=sanitize_docs")
 			}
-			filescan.Scan(API, *options)
+			filescan.Scan(&API, *options)
 		}, func() { cmd.Help() })
 	},
 }

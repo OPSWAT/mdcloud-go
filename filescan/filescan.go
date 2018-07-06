@@ -4,7 +4,9 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/sirupsen/logrus"
 
@@ -26,7 +28,7 @@ type ScanOptions struct {
 var watcher *fsnotify.Watcher
 
 // Scan or watches files or path
-func Scan(api api.API, options ScanOptions) {
+func Scan(api *api.API, options ScanOptions) {
 	if options.Path != nil && len(options.Path) > 0 {
 		fname := options.Path[0]
 		if !path.IsAbs(fname) {
@@ -58,13 +60,21 @@ func Scan(api api.API, options ScanOptions) {
 	}
 }
 
-func watchScan(api api.API, options ScanOptions) {
+func watchScan(api *api.API, options ScanOptions) {
 	watcher, _ = fsnotify.NewWatcher()
 	defer watcher.Close()
 
 	if err := filepath.Walk(options.Path[0], addPaths); err != nil {
 		logrus.Fatalln(err)
 	}
+
+	var rate time.Duration
+	if api.Type > 0 {
+		rate = time.Minute / 10
+	} else {
+		rate = time.Minute / 100
+	}
+	throttle := time.Tick(rate)
 
 	done := make(chan bool)
 	go func() {
@@ -73,7 +83,26 @@ func watchScan(api api.API, options ScanOptions) {
 			case event := <-watcher.Events:
 				if !strings.Contains(event.Name, "/.") && ((event.Op == fsnotify.Write) || (event.Op == fsnotify.Create)) {
 					logrus.WithFields(logrus.Fields{"op": event.Op, "type": event.Name}).Infoln("Change detected")
-					go lookupSHA1(api, event.Name, options)
+					<-throttle
+					if len(api.Limits) > 0 {
+						if res, _ := strconv.Atoi(api.Limits["X-Ratelimit-Remaining"][0]); res > 1 {
+							if res < 50 {
+								logrus.WithField("X-Ratelimit-Remaining", res).Warnln("limit less than 50")
+							}
+							go lookupSHA1(api, event.Name, options)
+						} else {
+							resetIn := api.Limits["X-RateLimit-Reset-In"][0]
+							sz := len(resetIn)
+							if sz > 0 && resetIn[sz-1] == 's' {
+								resetIn = resetIn[:sz-1]
+								sleepTime, _ := strconv.Atoi(resetIn)
+								logrus.WithField("X-RateLimit-Reset-In", resetIn).Warnln("limit reached, will delay until it is reset")
+								time.Sleep(time.Duration(sleepTime) * time.Second)
+							}
+						}
+					} else {
+						lookupSHA1(api, event.Name, options)
+					}
 				}
 			case err := <-watcher.Errors:
 				logrus.Fatalln(err)
@@ -83,7 +112,7 @@ func watchScan(api api.API, options ScanOptions) {
 	<-done
 }
 
-func lookupSHA1(api api.API, filePath string, options ScanOptions) {
+func lookupSHA1(api *api.API, filePath string, options ScanOptions) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		logrus.Warningln("Failed to read file")

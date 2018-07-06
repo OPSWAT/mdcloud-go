@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/OPSWAT/mdcloud-go/utils"
 	"github.com/sirupsen/logrus"
 )
 
@@ -101,6 +102,9 @@ func (api *API) ScanFile(path string, headers []string, poll bool) (string, erro
 	}
 	var s = new(ScanResponse)
 	err = json.NewDecoder(resp.Body).Decode(&s)
+	filterHeaders := func(s string) bool { return strings.HasPrefix(s, "X-") }
+	rateLimits := utils.FilterMap(resp.Header, filterHeaders)
+	api.Limits = rateLimits
 	defer resp.Body.Close()
 	if err != nil {
 		logrus.Errorln(err)
@@ -114,10 +118,9 @@ func (api *API) ScanFile(path string, headers []string, poll bool) (string, erro
 		logrus.WithField("data_id", s.Data.DataID).Infoln("Result data_id")
 		if r, e := json.Marshal(s); e == nil {
 			return string(r), nil
-		} else {
-			logrus.Errorln(err)
-			return "", e
 		}
+		logrus.Errorln(err)
+		return "", err
 	}
 	var jsonResult string
 	ticker := time.NewTicker(2 * time.Second)
