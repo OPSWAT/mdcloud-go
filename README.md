@@ -1,5 +1,7 @@
 ![logo](images/MD-Cloud-logo-black.svg)<!-- .element height="10%" width="10%" -->
 
+[![GoDoc](https://godoc.org/github.com/OPSWAT/mdcloud-go?status.svg)](https://godoc.org/github.com/OPSWAT/mdcloud-go) [![Go Report Card](https://goreportcard.com/badge/github.com/OPSWAT/mdcloud-go)](https://goreportcard.com/report/github.com/OPSWAT/mdcloud-go)
+
 # mdcloud cli
 
 Command line tool for metadefender cloud ip scanner designed for scanning amazon security groups.
