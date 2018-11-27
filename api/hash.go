@@ -10,37 +10,54 @@ import (
 	"time"
 )
 
+// ProcessInfo post procesing info
+type ProcessInfo struct {
+	UserAgent          string `json:"user_agent"`
+	Result             string `json:"result"`
+	ProgressPercentage int    `json:"progress_percentage"`
+	Profile            string `json:"profile"`
+	PostProcessing     struct {
+		CopyMoveDestination  string `json:"copy_move_destination"`
+		ConvertedTo          string `json:"converted_to"`
+		ConvertedDestination string `json:"converted_destination"`
+		ActionsRan           string `json:"actions_ran"`
+		ActionsFailed        string `json:"actions_failed"`
+	} `json:"post_processing"`
+	FileTypeSkippedScan bool   `json:"file_type_skipped_scan"`
+	BlockedReason       string `json:"blocked_reason"`
+}
+
+// Votes per hash
+type Votes struct {
+	Up   int `json:"up"`
+	Down int `json:"down"`
+}
+
 // HashLookupResp by hash
+// todo generate from swagger
 type HashLookupResp struct {
 	Success bool `json:"success"`
 	Data    struct {
-		FileID      string `json:"file_id"`
-		DataID      string `json:"data_id"`
-		Archived    bool   `json:"archived"`
-		ScanResults struct {
-			ScanDetails        string    `json:"scan_details"`
-			RescanAvailable    bool      `json:"rescan_available"`
-			DataID             string    `json:"data_id"`
-			ScanAllResultI     int       `json:"scan_all_result_i"`
-			StartTime          time.Time `json:"start_time"`
-			TotalTime          int       `json:"total_time"`
-			TotalAvs           int       `json:"total_avs"`
-			TotalDetectedAvs   int       `json:"total_detected_avs"`
-			ProgressPercentage int       `json:"progress_percentage"`
-			InQueue            int       `json:"in_queue"`
-			ScanAllResultA     string    `json:"scan_all_result_a"`
+		ScanResultHistoryLength int         `json:"scan_result_history_length"`
+		Votes                   Votes       `json:"votes"`
+		FileID                  string      `json:"file_id"`
+		DataID                  string      `json:"data_id"`
+		Archived                bool        `json:"archived"`
+		ProcessInfo             ProcessInfo `json:"process_info"`
+		ScanResults             struct {
+			ScanDetails        map[string]EngineResult `json:"scan_details"`
+			RescanAvailable    bool                    `json:"rescan_available"`
+			DataID             string                  `json:"data_id"`
+			ScanAllResultI     int                     `json:"scan_all_result_i"`
+			StartTime          time.Time               `json:"start_time"`
+			TotalTime          int                     `json:"total_time"`
+			TotalAvs           int                     `json:"total_avs"`
+			TotalDetectedAvs   int                     `json:"total_detected_avs"`
+			ProgressPercentage int                     `json:"progress_percentage"`
+			InQueue            int                     `json:"in_queue"`
+			ScanAllResultA     string                  `json:"scan_all_result_a"`
 		} `json:"scan_results"`
-		FileInfo struct {
-			FileSize            int       `json:"file_size"`
-			UploadTimestamp     time.Time `json:"upload_timestamp"`
-			Md5                 string    `json:"md5"`
-			Sha1                string    `json:"sha1"`
-			Sha256              string    `json:"sha256"`
-			FileTypeCategory    string    `json:"file_type_category"`
-			FileTypeDescription string    `json:"file_type_description"`
-			FileTypeExtension   string    `json:"file_type_extension"`
-			DisplayName         string    `json:"display_name"`
-		} `json:"file_info"`
+		FileInfo    FileInfo `json:"file_info"`
 		HashResults struct {
 			Wa bool `json:"wa"`
 		} `json:"hash_results"`

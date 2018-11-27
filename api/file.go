@@ -35,37 +35,50 @@ type ScanResponse struct {
 	} `json:"error"`
 }
 
-// DataIDResponse used for polling result
-type DataIDResponse struct {
+// EngineResult defines particular engine result details
+type EngineResult struct {
+	WaitTime    int       `json:"wait_time"`
+	ThreatFound string    `json:"threat_found"`
+	ScanTime    int       `json:"scan_time"`
+	ScanResultI int       `json:"scan_result_i"`
+	DefTime     time.Time `json:"def_time"`
+}
+
+type FileInfo struct {
+	FileSize            int       `json:"file_size"`
+	UploadTimestamp     time.Time `json:"upload_timestamp"`
+	Md5                 string    `json:"md5"`
+	Sha1                string    `json:"sha1"`
+	Sha256              string    `json:"sha256"`
+	FileTypeCategory    string    `json:"file_type_category"`
+	FileTypeDescription string    `json:"file_type_description"`
+	FileTypeExtension   string    `json:"file_type_extension"`
+	DisplayName         string    `json:"display_name"`
+}
+
+// ScanResult used for polling result
+type ScanResult struct {
 	Success bool `json:"success"`
 	Data    struct {
 		DataID      string `json:"data_id"`
 		Archived    bool   `json:"archived"`
 		ScanResults struct {
-			ScanDetails struct {
-			} `json:"scan_details"`
-			RescanAvailable    bool   `json:"rescan_available"`
-			DataID             string `json:"data_id"`
-			ScanAllResultI     int    `json:"scan_all_result_i"`
-			StartTime          string `json:"start_time"`
-			TotalTime          int    `json:"total_time"`
-			TotalAvs           int    `json:"total_avs"`
-			TotalDetectedAvs   int    `json:"total_detected_avs"`
-			ProgressPercentage int    `json:"progress_percentage"`
-			InQueue            int    `json:"in_queue"`
-			ScanAllResultA     string `json:"scan_all_result_a"`
+			ScanDetails        map[string]EngineResult `json:"scan_details"`
+			RescanAvailable    bool                    `json:"rescan_available"`
+			DataID             string                  `json:"data_id"`
+			ScanAllResultI     int                     `json:"scan_all_result_i"`
+			StartTime          time.Time               `json:"start_time"`
+			TotalTime          int                     `json:"total_time"`
+			TotalAvs           int                     `json:"total_avs"`
+			TotalDetectedAvs   int                     `json:"total_detected_avs"`
+			ProgressPercentage int                     `json:"progress_percentage"`
+			InQueue            int                     `json:"in_queue"`
+			ScanAllResultA     string                  `json:"scan_all_result_a"`
 		} `json:"scan_results"`
-		FileInfo struct {
-			FileSize            int    `json:"file_size"`
-			UploadTimestamp     string `json:"upload_timestamp"`
-			Md5                 string `json:"md5"`
-			Sha1                string `json:"sha1"`
-			Sha256              string `json:"sha256"`
-			FileTypeCategory    string `json:"file_type_category"`
-			FileTypeDescription string `json:"file_type_description"`
-			FileTypeExtension   string `json:"file_type_extension"`
-			DisplayName         string `json:"display_name"`
-		} `json:"file_info"`
+		FileInfo    FileInfo `json:"file_info"`
+		HashResults struct {
+			Wa bool `json:"wa"`
+		} `json:"hash_results"`
 		TopThreat   int    `json:"top_threat"`
 		ShareFile   int    `json:"share_file"`
 		RestVersion string `json:"rest_version"`
@@ -129,7 +142,7 @@ func (api *API) ScanFile(path string, headers []string, poll bool) (string, erro
 	for {
 		select {
 		case <-ticker.C:
-			result := new(DataIDResponse)
+			result := new(ScanResult)
 			resDataID, err := api.ResultsByDataID(s.Data.DataID)
 			if err != nil {
 				return "", errors.New("Failed to get results for: " + resDataID)
