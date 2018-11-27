@@ -55,14 +55,30 @@ type FileInfo struct {
 	FileTypeExtension   string    `json:"file_type_extension"`
 	DisplayName         string    `json:"display_name"`
 }
+type ExtractedFiles struct {
+	DataID         string `json:"data_id"`
+	FilesInArchive []struct {
+		ScanResultI        int    `json:"scan_result_i"`
+		ProgressPercentage int    `json:"progress_percentage"`
+		FileType           string `json:"file_type"`
+		FileSize           int    `json:"file_size"`
+		DisplayName        string `json:"display_name"`
+		DetectedBy         int    `json:"detected_by"`
+		DataID             string `json:"data_id"`
+	} `json:"files_in_archive"`
+}
 
 // ScanResult used for polling result
 type ScanResult struct {
 	Success bool `json:"success"`
 	Data    struct {
-		DataID      string `json:"data_id"`
-		Archived    bool   `json:"archived"`
-		ScanResults struct {
+		DataID                  string         `json:"data_id"`
+		Archived                bool           `json:"archived"`
+		ProcessInfo             ProcessInfo    `json:"process_info"`
+		ExtractedFiles          ExtractedFiles `json:"extracted_files"`
+		ScanResultHistoryLength int            `json:"scan_result_history_length"`
+		Votes                   Votes          `json:"votes"`
+		ScanResults             struct {
 			ScanDetails        map[string]EngineResult `json:"scan_details"`
 			RescanAvailable    bool                    `json:"rescan_available"`
 			DataID             string                  `json:"data_id"`

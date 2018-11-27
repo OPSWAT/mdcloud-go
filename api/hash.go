@@ -38,12 +38,13 @@ type Votes struct {
 type HashLookupResp struct {
 	Success bool `json:"success"`
 	Data    struct {
-		ScanResultHistoryLength int         `json:"scan_result_history_length"`
-		Votes                   Votes       `json:"votes"`
-		FileID                  string      `json:"file_id"`
-		DataID                  string      `json:"data_id"`
-		Archived                bool        `json:"archived"`
-		ProcessInfo             ProcessInfo `json:"process_info"`
+		ScanResultHistoryLength int            `json:"scan_result_history_length"`
+		Votes                   Votes          `json:"votes"`
+		FileID                  string         `json:"file_id"`
+		DataID                  string         `json:"data_id"`
+		Archived                bool           `json:"archived"`
+		ProcessInfo             ProcessInfo    `json:"process_info"`
+		ExtractedFiles          ExtractedFiles `json:"extracted_files"`
 		ScanResults             struct {
 			ScanDetails        map[string]EngineResult `json:"scan_details"`
 			RescanAvailable    bool                    `json:"rescan_available"`
