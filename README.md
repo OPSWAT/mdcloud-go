@@ -1,4 +1,8 @@
-![logo](images/MD-Cloud-logo-black.svg)<!-- .element height="10%" width="10%" -->
+<a href="https://metadefender.com">
+  <img src="images/MD-Cloud-logo-black.svg" width="50%" height="50%">
+</a>
+<br/>
+<br/>
 
 [![mdcloud-result](https://api.metadefender.com/v4/hash/16716AA47017A93D5DF00C860457732BA60ABB75/badge?size=small&type=svg)](https://metadefender.opswat.com/results#!/file/16716AA47017A93D5DF00C860457732BA60ABB75/hash/overview)
 [![GoDoc](https://godoc.org/github.com/OPSWAT/mdcloud-go?status.svg)](https://godoc.org/github.com/OPSWAT/mdcloud-go) [![Go Report Card](https://goreportcard.com/badge/github.com/OPSWAT/mdcloud-go)](https://goreportcard.com/report/github.com/OPSWAT/mdcloud-go)
