@@ -1,6 +1,6 @@
 # Release the given VERSION
 
-MDCLOUD_GO_VERSION=1.0.0
+MDCLOUD_GO_VERSION=1.1.0
 
 release:
 ifndef VERSION
