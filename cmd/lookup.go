@@ -23,9 +23,9 @@ func IsIpv4(ipAddress string) bool {
 
 // lookupCmd represents the lookup command
 var lookupCmd = &cobra.Command{
-	Use:   "lookup [hash, ip, domain]",
-	Short: "Lookup or download file or IPs/Domains",
-	Long:  "Lookup or download file by md5, sha1, sha256 or IPs/Domains",
+	Use:   "lookup [hash, ip, domain, url]",
+	Short: "Lookup or download file or IPs/Domains/URLs",
+	Long:  "Lookup or download file by MD5, SHA1, SHA256 or IPs/Domains/URLs",
 	Run: func(cmd *cobra.Command, args []string) {
 		var ips []string
 		var domains []string

@@ -37,6 +37,8 @@ var RootCmd = &cobra.Command{
 			logrus.SetFormatter(&logstash.LogstashFormatter{})
 		case "text":
 			logrus.SetFormatter(&prettyf.TextFormatter{})
+		default:
+			logrus.SetFormatter(new(PlainFmt))
 		}
 	},
 }
@@ -68,7 +70,7 @@ func Execute(version string) {
 
 func init() {
 	RootCmd.PersistentFlags().StringVarP(&apikey, "apikey", "a", "", "set apikey token (default is MDCLOUD_APIKEY env variable)")
-	RootCmd.PersistentFlags().StringVarP(&formatter, "formatter", "f", "text", "set formatter type to  json or text")
+	RootCmd.PersistentFlags().StringVarP(&formatter, "formatter", "f", "", "set formatter type to json, text, logstash, gelf or raw")
 }
 
 // Response placeholder
