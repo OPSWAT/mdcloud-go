@@ -79,7 +79,7 @@ Available Commands:
   vulnerability Vulnerability for hash
 
 Flags:
-  -a, --apikey string      set apikey token (default is MDCLOUD_APIKEY env variable)
+  -a, --apikey string      set apikey token
   -f, --formatter string   set formatter type to text, json or raw (default "text")
   -h, --help               help for mdcloud
 

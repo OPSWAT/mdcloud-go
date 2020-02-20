@@ -47,13 +47,13 @@ func NewAPI(apikey string) (API, error) {
 	if apikey != "" {
 		api.Token = apikey
 		api.Authorization = fmt.Sprintf("apikey %s", apikey)
+		err := api.getAPIType()
+		if err != nil {
+			return api, err
+		}
 	} else {
 		api.Token = shared
 		api.Authorization = fmt.Sprintf("apikey %s", shared)
-	}
-	err := api.getAPIType()
-	if err != nil {
-		return api, err
 	}
 	return api, nil
 }

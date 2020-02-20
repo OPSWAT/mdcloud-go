@@ -19,6 +19,6 @@ var cveCmd = &cobra.Command{
 }
 
 func init() {
-	RootCmd.AddCommand(cveCmd)
-	cveCmd.PersistentFlags().StringVarP(&property, "type", "t", "", "get list of hashes, products, vendors for CVE")
+	// RootCmd.AddCommand(cveCmd)
+	// cveCmd.PersistentFlags().StringVarP(&property, "type", "t", "", "get list of hashes, products, vendors for CVE")
 }
