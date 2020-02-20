@@ -20,6 +20,7 @@ type ScanOptions struct {
 	Headers      []string
 	Watcher      bool
 	Sanitization bool
+	Unarchive    bool
 	LookupFile   bool
 	Poll         bool
 }
