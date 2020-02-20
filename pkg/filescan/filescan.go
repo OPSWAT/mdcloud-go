@@ -80,7 +80,7 @@ func watchScan(api *api.API, options ScanOptions) {
 		for {
 			select {
 			case event := <-watcher.Events:
-				if !strings.Contains(event.Name, "/.") && ((event.Op == fsnotify.Write) || (event.Op == fsnotify.Create)) {
+				if !strings.Contains(event.Name, "/.") && event.Op == fsnotify.Write {
 					logrus.WithFields(logrus.Fields{"op": event.Op, "type": event.Name}).Infoln("Change detected")
 					<-throttle
 					if len(api.Limits) > 0 {

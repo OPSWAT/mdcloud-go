@@ -21,76 +21,12 @@ type RescanReq struct {
 	FileIDs []string `json:"file_ids"`
 }
 
-// ScanResponse used for scan body
-type ScanResponse struct {
-	DataID        string   `json:"data_id"`
-	Status        string   `json:"status"`
-	InQueue       int      `json:"in_queue"`
-	QueuePriority string   `json:"queue_priority"`
-	Error         ApiError `json:"error"`
-}
-
-// EngineResult defines particular engine result details
-type EngineResult struct {
-	WaitTime    int       `json:"wait_time"`
-	ThreatFound string    `json:"threat_found"`
-	ScanTime    int       `json:"scan_time"`
-	ScanResultI int       `json:"scan_result_i"`
-	DefTime     time.Time `json:"def_time"`
-}
-
-type FileInfo struct {
-	FileSize            int       `json:"file_size"`
-	UploadTimestamp     time.Time `json:"upload_timestamp"`
-	Md5                 string    `json:"md5"`
-	Sha1                string    `json:"sha1"`
-	Sha256              string    `json:"sha256"`
-	FileTypeCategory    string    `json:"file_type_category"`
-	FileTypeDescription string    `json:"file_type_description"`
-	FileTypeExtension   string    `json:"file_type_extension"`
-	DisplayName         string    `json:"display_name"`
-}
-type ExtractedFiles struct {
-	DataID         string `json:"data_id"`
-	FilesInArchive []struct {
-		ScanResultI        int    `json:"scan_result_i"`
-		ProgressPercentage int    `json:"progress_percentage"`
-		FileType           string `json:"file_type"`
-		FileSize           int    `json:"file_size"`
-		DisplayName        string `json:"display_name"`
-		DetectedBy         int    `json:"detected_by"`
-		DataID             string `json:"data_id"`
-	} `json:"files_in_archive"`
-}
-
-// ScanResult used for polling result
-type ScanResult struct {
-	DataID                  string         `json:"data_id"`
-	Archived                bool           `json:"archived"`
-	ProcessInfo             ProcessInfo    `json:"process_info"`
-	ExtractedFiles          ExtractedFiles `json:"extracted_files"`
-	ScanResultHistoryLength int            `json:"scan_result_history_length"`
-	Votes                   Votes          `json:"votes"`
-	ScanResults             struct {
-		ScanDetails        map[string]EngineResult `json:"scan_details"`
-		RescanAvailable    bool                    `json:"rescan_available"`
-		DataID             string                  `json:"data_id"`
-		ScanAllResultI     int                     `json:"scan_all_result_i"`
-		StartTime          time.Time               `json:"start_time"`
-		TotalTime          int                     `json:"total_time"`
-		TotalAvs           int                     `json:"total_avs"`
-		TotalDetectedAvs   int                     `json:"total_detected_avs"`
-		ProgressPercentage int                     `json:"progress_percentage"`
-		InQueue            int                     `json:"in_queue"`
-		ScanAllResultA     string                  `json:"scan_all_result_a"`
+type ScanResp struct {
+	DataID      string `json:"data_id"`
+	ScanResults struct {
+		ProgressPercentage int `json:"progress_percentage"`
 	} `json:"scan_results"`
-	FileInfo    FileInfo `json:"file_info"`
-	HashResults struct {
-		Wa bool `json:"wa"`
-	} `json:"hash_results"`
-	TopThreat   int    `json:"top_threat"`
-	ShareFile   int    `json:"share_file"`
-	RestVersion string `json:"rest_version"`
+	Error ApiError `json:"error"`
 }
 
 // ScanFile sends to API
@@ -122,7 +58,7 @@ func (api *API) ScanFile(path string, headers []string, poll bool) (string, erro
 		return "", err
 	}
 	defer resp.Body.Close()
-	var s = new(ScanResponse)
+	var s = new(ScanResp)
 	err = json.NewDecoder(resp.Body).Decode(&s)
 	filterHeaders := func(s string) bool { return strings.HasPrefix(s, "X-") }
 	rateLimits := utils.FilterMap(resp.Header, filterHeaders)
@@ -150,7 +86,7 @@ func (api *API) ScanFile(path string, headers []string, poll bool) (string, erro
 	for {
 		select {
 		case <-ticker.C:
-			result := new(ScanResult)
+			result := new(ScanResp)
 			resDataID, err := api.ResultsByDataID(s.DataID)
 			if err != nil {
 				return "", errors.New("Failed to get results for: " + resDataID)
@@ -224,7 +160,7 @@ func (api *API) FindOrScan(path, hash string, headers []string, lookup, poll boo
 	if !lookup {
 		return api.ScanFile(path, headers, poll)
 	}
-	result := new(HashLookupResp)
+	result := new(ScanResp)
 	strRes, err := api.HashDetails(hash)
 	json.NewDecoder(strings.NewReader(strRes)).Decode(&result)
 	if cmp.Equal(result.Error, ApiError{}) {
