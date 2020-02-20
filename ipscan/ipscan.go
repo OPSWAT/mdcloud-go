@@ -13,9 +13,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/OPSWAT/mdcloud-go/api"
+	logger "github.com/sirupsen/logrus"
 
 	"github.com/pkg/errors"
 
@@ -31,16 +30,10 @@ type Request struct {
 
 // Response result of ipscan request
 type Response struct {
-	Success bool `json:"success"`
-	Error   struct {
-		Code     int      `json:"code"`
-		Messages []string `json:"messages"`
-	} `json:"error"`
-	Data []struct {
-		StartTime  time.Time `json:"start_time"`
-		DetectedBy int       `json:"detected_by"`
-		Address    string    `json:"address"`
-	} `json:"data"`
+	StartTime  time.Time    `json:"start_time"`
+	DetectedBy int          `json:"detected_by"`
+	Address    string       `json:"address"`
+	Error      api.ApiError `json:"error"`
 }
 
 var (
@@ -65,7 +58,7 @@ func ScanSGs(api api.API, sgs []string) {
 		}
 	}
 	if len(ips) == 0 {
-		logrus.Warningln("security group empty")
+		logger.Warningln("security group empty")
 		os.Exit(1)
 	}
 
@@ -89,7 +82,7 @@ func ScanSGs(api api.API, sgs []string) {
 			if err != nil {
 				errc <- err
 			}
-			req.Header.Set("Authorization", api.Authorization)
+			req.Header.Set("Authorization", api.Token)
 			req.Header.Set("Content-Type", "application/json")
 
 			resp, err := api.Client.Do(req)
@@ -103,7 +96,7 @@ func ScanSGs(api api.API, sgs []string) {
 					if e := json.Unmarshal(body, &rp); e != nil {
 						errc <- errors.New("parsing response")
 					}
-					logrus.WithFields(logrus.Fields{
+					logger.WithFields(logger.Fields{
 						"code":  rp.Error.Code,
 						"msg":   strings.Join(rp.Error.Messages, " "),
 						"batch": strings.Join(batch, ","),
@@ -113,7 +106,7 @@ func ScanSGs(api api.API, sgs []string) {
 				if remaining, err := strconv.Atoi(resp.Header.Get("x-ratelimit-remaining")); err == nil {
 					if remaining > 0 {
 						for _, item := range batch {
-							logrus.WithField("ip", item).Infoln("OK")
+							logger.WithField("ip", item).Infoln("OK")
 						}
 					} else {
 						errc <- errors.New("limit reached")
@@ -134,7 +127,7 @@ func ScanSGs(api api.API, sgs []string) {
 	case <-done:
 	case err := <-errc:
 		if err != nil {
-			logrus.Errorln(err)
+			logger.Errorln(err)
 			return
 		}
 	}
@@ -154,12 +147,12 @@ func ListIPs(sgs []string) {
 		}
 	}
 	if len(ips) == 0 {
-		logrus.Fatalln(errors.New("Security group empty"))
+		logger.Fatalln(errors.New("Security group empty"))
 	}
 
 	// TODO: display security groups before
 	for _, ip := range ips {
-		logrus.Infoln(ip)
+		logger.Infoln(ip)
 	}
 }
 
@@ -183,6 +176,6 @@ func getGroups(sgs []string) {
 		groups, err = svc.DescribeSecurityGroups(&ec2.DescribeSecurityGroupsInput{})
 	}
 	if err != nil {
-		logrus.WithField("security_groups", sgs).Fatalln(errors.WithMessage(err, "Error requesting group description"))
+		logger.WithField("security_groups", sgs).Fatalln(errors.WithMessage(err, "Error requesting group description"))
 	}
 }

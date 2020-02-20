@@ -12,6 +12,6 @@ func (api *API) HashAppinfo(hash string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	req.Header.Add("Authorization", api.Authorization)
+	req.Header.Add("apikey", api.Token)
 	return fmtResponse(api.Client.Do(req))
 }

@@ -4,15 +4,15 @@ import (
 	"os"
 
 	"github.com/OPSWAT/mdcloud-go/cmd"
-	"github.com/sirupsen/logrus"
+	logger "github.com/sirupsen/logrus"
 )
 
 // VERSION build var
 var VERSION string
 
 func init() {
-	logrus.SetOutput(os.Stdout)
-	logrus.SetLevel(logrus.InfoLevel)
+	logger.SetOutput(os.Stdout)
+	logger.SetLevel(logger.InfoLevel)
 }
 
 func main() {

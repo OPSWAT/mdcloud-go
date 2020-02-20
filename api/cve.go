@@ -12,7 +12,7 @@ func (api *API) GetCVEs() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	req.Header.Add("Authorization", api.Authorization)
+	req.Header.Add("apikey", api.Token)
 	return fmtResponse(api.Client.Do(req))
 }
 
@@ -31,6 +31,6 @@ func (api *API) GetCVEDetails(CVE, property string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	req.Header.Add("Authorization", api.Authorization)
+	req.Header.Add("apikey", api.Token)
 	return fmtResponse(api.Client.Do(req))
 }

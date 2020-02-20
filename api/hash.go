@@ -36,36 +36,34 @@ type Votes struct {
 // HashLookupResp by hash
 // todo generate from swagger
 type HashLookupResp struct {
-	Success bool `json:"success"`
-	Data    struct {
-		ScanResultHistoryLength int            `json:"scan_result_history_length"`
-		Votes                   Votes          `json:"votes"`
-		FileID                  string         `json:"file_id"`
-		DataID                  string         `json:"data_id"`
-		Archived                bool           `json:"archived"`
-		ProcessInfo             ProcessInfo    `json:"process_info"`
-		ExtractedFiles          ExtractedFiles `json:"extracted_files"`
-		ScanResults             struct {
-			ScanDetails        map[string]EngineResult `json:"scan_details"`
-			RescanAvailable    bool                    `json:"rescan_available"`
-			DataID             string                  `json:"data_id"`
-			ScanAllResultI     int                     `json:"scan_all_result_i"`
-			StartTime          time.Time               `json:"start_time"`
-			TotalTime          int                     `json:"total_time"`
-			TotalAvs           int                     `json:"total_avs"`
-			TotalDetectedAvs   int                     `json:"total_detected_avs"`
-			ProgressPercentage int                     `json:"progress_percentage"`
-			InQueue            int                     `json:"in_queue"`
-			ScanAllResultA     string                  `json:"scan_all_result_a"`
-		} `json:"scan_results"`
-		FileInfo    FileInfo `json:"file_info"`
-		HashResults struct {
-			Wa bool `json:"wa"`
-		} `json:"hash_results"`
-		TopThreat   int    `json:"top_threat"`
-		ShareFile   int    `json:"share_file"`
-		RestVersion string `json:"rest_version"`
-	} `json:"data"`
+	ScanResultHistoryLength int            `json:"scan_result_history_length"`
+	Votes                   Votes          `json:"votes"`
+	FileID                  string         `json:"file_id"`
+	DataID                  string         `json:"data_id"`
+	Archived                bool           `json:"archived"`
+	ProcessInfo             ProcessInfo    `json:"process_info"`
+	ExtractedFiles          ExtractedFiles `json:"extracted_files"`
+	ScanResults             struct {
+		ScanDetails        map[string]EngineResult `json:"scan_details"`
+		RescanAvailable    bool                    `json:"rescan_available"`
+		DataID             string                  `json:"data_id"`
+		ScanAllResultI     int                     `json:"scan_all_result_i"`
+		StartTime          time.Time               `json:"start_time"`
+		TotalTime          int                     `json:"total_time"`
+		TotalAvs           int                     `json:"total_avs"`
+		TotalDetectedAvs   int                     `json:"total_detected_avs"`
+		ProgressPercentage int                     `json:"progress_percentage"`
+		InQueue            int                     `json:"in_queue"`
+		ScanAllResultA     string                  `json:"scan_all_result_a"`
+	} `json:"scan_results"`
+	FileInfo    FileInfo `json:"file_info"`
+	HashResults struct {
+		Wa bool `json:"wa"`
+	} `json:"hash_results"`
+	TopThreat   int      `json:"top_threat"`
+	ShareFile   int      `json:"share_file"`
+	RestVersion string   `json:"rest_version"`
+	Error       ApiError `json:"error"`
 }
 
 // HashLookupReq used for rescan body
@@ -80,7 +78,7 @@ func (api *API) HashDetails(hash string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	req.Header.Add("Authorization", api.Authorization)
+	req.Header.Add("apikey", api.Token)
 	return fmtResponse(api.Client.Do(req))
 }
 
@@ -93,7 +91,7 @@ func (api *API) HashesDetails(hashes []string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	req.Header.Add("Authorization", api.Authorization)
+	req.Header.Add("apikey", api.Token)
 	req.Header.Add("content-type", "application/json")
 	return fmtResponse(api.Client.Do(req))
 }
@@ -113,6 +111,6 @@ func (api *API) HashVulnerabilities(hash string, limit, offset int) (string, err
 	if err != nil {
 		return "", err
 	}
-	req.Header.Add("Authorization", api.Authorization)
+	req.Header.Add("apikey", api.Token)
 	return fmtResponse(api.Client.Do(req))
 }

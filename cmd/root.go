@@ -7,9 +7,11 @@ import (
 
 	"github.com/OPSWAT/mdcloud-go/api"
 	"github.com/OPSWAT/mdcloud-go/utils"
-
-	"github.com/sirupsen/logrus"
+	logstash "github.com/bshuster-repo/logrus-logstash-hook"
+	gelf "github.com/fabienm/go-logrus-formatters"
+	logger "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	prettyf "github.com/x-cray/logrus-prefixed-formatter"
 )
 
 // VERSION for build
@@ -27,9 +29,14 @@ var RootCmd = &cobra.Command{
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		switch formatter {
 		case "json":
-			logrus.SetFormatter(&logrus.JSONFormatter{})
-		case "raw":
-			logrus.SetFormatter(new(Response))
+			logger.SetFormatter(&logger.JSONFormatter{})
+		case "gelf":
+			hostname, _ := os.Hostname()
+			logger.SetFormatter(gelf.NewGelf(hostname))
+		case "logstash":
+			logger.SetFormatter(&logstash.LogstashFormatter{})
+		case "text":
+			logger.SetFormatter(&prettyf.TextFormatter{})
 		}
 	},
 }
@@ -50,25 +57,25 @@ func Execute(version string) {
 	}
 
 	if apikeyErr != nil {
-		logrus.Fatalln(apikeyErr)
+		logger.Fatalln(apikeyErr)
 	}
 
 	if err := RootCmd.Execute(); err != nil {
-		logrus.Fatalln(err)
+		logger.Fatalln(err)
 		os.Exit(1)
 	}
 }
 
 func init() {
 	RootCmd.PersistentFlags().StringVarP(&apikey, "apikey", "a", "", "set apikey token (default is MDCLOUD_APIKEY env variable)")
-	RootCmd.PersistentFlags().StringVarP(&formatter, "formatter", "f", "text", "set formatter type to text, json or raw")
+	RootCmd.PersistentFlags().StringVarP(&formatter, "formatter", "f", "text", "set formatter type to  json or text")
 }
 
 // Response placeholder
 type Response struct{}
 
 // Format parses the message, returns raw json, no log
-func (f *Response) Format(entry *logrus.Entry) ([]byte, error) {
+func (f *Response) Format(entry *logger.Entry) ([]byte, error) {
 	var js map[string]interface{}
 	if json.Unmarshal([]byte(entry.Message), &js) != nil && utils.IsLetter(string(entry.Message[0])) {
 		return nil, nil

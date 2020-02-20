@@ -16,7 +16,7 @@ type IPLookupReq struct {
 func (api *API) IPDetails(ip string) (string, error) {
 	url := fmt.Sprintf("%s/ip/%s", api.URL, ip)
 	req, err := http.NewRequest(http.MethodGet, url, nil)
-	req.Header.Add("Authorization", api.Authorization)
+	req.Header.Add("apikey", api.Token)
 	if err != nil {
 		return "", err
 	}
@@ -29,7 +29,7 @@ func (api *API) IPsDetails(address []string) (string, error) {
 	payload := &IPLookupReq{Address: address}
 	j, _ := json.Marshal(payload)
 	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(j))
-	req.Header.Add("Authorization", api.Authorization)
+	req.Header.Add("apikey", api.Token)
 	if err != nil {
 		return "", err
 	}

@@ -7,30 +7,31 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/sirupsen/logrus"
+	logger "github.com/sirupsen/logrus"
 )
 
 // API struct containing main details
 type API struct {
-	URL           string
-	Token         string
-	Client        *http.Client
-	Authorization string
-	Limits        map[string][]string
-	Type          int
+	URL    string
+	Token  string
+	Client *http.Client
+	Limits map[string][]string
+	Type   int
+}
+
+type ApiError struct {
+	Code     int      `json:"code"`
+	Messages []string `json:"messages"`
 }
 
 type ApikeyStatus struct {
-	Success bool `json:"success"`
-	Data    struct {
-		QosScan  string `json:"qos_scan"`
-		PaidUser int    `json:"paid_user"`
-	} `json:"data"`
+	QosScan  string `json:"qos_scan"`
+	PaidUser int    `json:"paid_user"`
 }
 
 // URL for API
 const (
-	mainURL          = "https://api.metadefender.com/v3"
+	mainURL          = "https://api.metadefender.com/v4"
 	shared           = "a93f6ed2dec2a246b69935eefd318273"
 	LimitFor         = "X-RateLimit-For"
 	LimitInterval    = "X-RateLimit-Interval"
@@ -42,37 +43,34 @@ const (
 
 // NewAPI object
 func NewAPI(apikey string) (API, error) {
-	api := API{Token: apikey, Authorization: fmt.Sprintf("apikey %s", apikey), URL: mainURL,
-		Client: &http.Client{Timeout: 2 * time.Minute}, Limits: make(map[string][]string)}
+	api := API{Token: apikey, URL: mainURL, Client: &http.Client{Timeout: 2 * time.Minute}, Limits: make(map[string][]string)}
 	if apikey != "" {
 		api.Token = apikey
-		api.Authorization = fmt.Sprintf("apikey %s", apikey)
-		err := api.getAPIType()
+		err := api.setType()
 		if err != nil {
 			return api, err
 		}
 	} else {
 		api.Token = shared
-		api.Authorization = fmt.Sprintf("apikey %s", shared)
 	}
 	return api, nil
 }
 
-func (api *API) getAPIType() error {
+func (api *API) setType() error {
 	var err error
 	var apikeyStatus ApikeyStatus
 	url := fmt.Sprintf("%s/apikey/%s", api.URL, api.Token)
 	req, err := http.NewRequest(http.MethodGet, url, nil)
-	req.Header.Add("Authorization", api.Authorization)
+	req.Header.Add("apikey", api.Token)
 	resp, err := api.Client.Do(req)
 	if body, err := ioutil.ReadAll(resp.Body); err == nil {
 		if e := json.Unmarshal(body, &apikeyStatus); e != nil {
-			logrus.Fatalln(e)
+			logger.Fatalln(e)
 			return e
 		}
 	}
 	defer resp.Body.Close()
-	api.Type = apikeyStatus.Data.PaidUser
+	api.Type = apikeyStatus.PaidUser
 	return err
 }
 

@@ -23,7 +23,7 @@ func (api *API) GetFalsePositivesFeed(engine string, page int) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	req.Header.Add("Authorization", api.Authorization)
+	req.Header.Add("apikey", api.Token)
 	return fmtResponse(api.Client.Do(req))
 }
 
@@ -47,7 +47,7 @@ func (api *API) GetInfectedHashesFeed(fmtType string, page int) (string, error) 
 	if err != nil {
 		return "", err
 	}
-	req.Header.Add("Authorization", api.Authorization)
+	req.Header.Add("apikey", api.Token)
 	return fmtResponse(api.Client.Do(req))
 }
 
@@ -63,7 +63,7 @@ func (api *API) GetHashesFeed(page int) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	req.Header.Add("Authorization", api.Authorization)
+	req.Header.Add("apikey", api.Token)
 	return fmtResponse(api.Client.Do(req))
 }
 
@@ -74,6 +74,6 @@ func (api *API) GetHashDownloadLink(hash string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	req.Header.Add("Authorization", api.Authorization)
+	req.Header.Add("apikey", api.Token)
 	return fmtResponse(api.Client.Do(req))
 }
