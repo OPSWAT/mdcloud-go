@@ -1,7 +1,7 @@
 package cve
 
 import (
-	"github.com/OPSWAT/mdcloud-go/api"
+	"github.com/OPSWAT/mdcloud-go/pkg/api"
 	logger "github.com/sirupsen/logrus"
 )
 

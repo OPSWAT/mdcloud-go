@@ -1,8 +1,8 @@
 package lookup
 
 import (
-	"github.com/OPSWAT/mdcloud-go/api"
-	"github.com/OPSWAT/mdcloud-go/utils"
+	"github.com/OPSWAT/mdcloud-go/pkg/api"
+	"github.com/OPSWAT/mdcloud-go/pkg/utils"
 	logger "github.com/sirupsen/logrus"
 )
 

@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/OPSWAT/mdcloud-go/cve"
+	"github.com/OPSWAT/mdcloud-go/pkg/cve"
 	"github.com/spf13/cobra"
 )
 

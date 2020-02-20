@@ -1,5 +1,5 @@
 <a href="https://metadefender.com">
-  <img src="images/MD-Cloud-logo-black.svg" width="50%" height="50%">
+  <img src="MD-Cloud-logo-black.svg" width="50%" height="50%">
 </a>
 <br/>
 <br/>
@@ -16,10 +16,10 @@ Command line tool for metadefender cloud ip scanner designed for scanning amazon
 The simple way of installing the tool:
 
 ```bash
-sudo wget -q https://github.com/OPSWAT/mdcloud-go/releases/download/1.1.0/mdcloud-go_linux_amd64 -O /usr/local/bin/mdcloud && sudo chmod +x /usr/local/bin/mdcloud
+sudo wget -q https://github.com/OPSWAT/mdcloud-go/pkg/releases/download/1.1.0/mdcloud-go_linux_amd64 -O /usr/local/bin/mdcloud && sudo chmod +x /usr/local/bin/mdcloud
 ```
 
-Visit [this page](https://github.com/OPSWAT/mdcloud-go/releases) for a list of alternative downloads.
+Visit [this page](https://github.com/OPSWAT/mdcloud-go/pkg/releases) for a list of alternative downloads.
 
 For building we use a docker image with all the dependencies installed. The image is built from `image.dockerfile` file
 

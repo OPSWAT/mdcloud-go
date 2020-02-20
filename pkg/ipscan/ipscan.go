@@ -13,13 +13,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/OPSWAT/mdcloud-go/api"
+	"github.com/OPSWAT/mdcloud-go/pkg/api"
+	"github.com/OPSWAT/mdcloud-go/pkg/aws"
+	"github.com/OPSWAT/mdcloud-go/pkg/utils"
 	logger "github.com/sirupsen/logrus"
 
 	"github.com/pkg/errors"
 
-	"github.com/OPSWAT/mdcloud-go/aws"
-	"github.com/OPSWAT/mdcloud-go/utils"
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 

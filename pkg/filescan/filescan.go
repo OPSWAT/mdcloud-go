@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/OPSWAT/mdcloud-go/api"
-	"github.com/OPSWAT/mdcloud-go/utils"
+	"github.com/OPSWAT/mdcloud-go/pkg/api"
+	"github.com/OPSWAT/mdcloud-go/pkg/utils"
 	"github.com/fsnotify/fsnotify"
 	logger "github.com/sirupsen/logrus"
 )

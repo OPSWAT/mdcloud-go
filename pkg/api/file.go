@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/OPSWAT/mdcloud-go/utils"
+	"github.com/OPSWAT/mdcloud-go/pkg/utils"
 	"github.com/google/go-cmp/cmp"
 	logger "github.com/sirupsen/logrus"
 )
@@ -121,12 +121,12 @@ func (api *API) ScanFile(path string, headers []string, poll bool) (string, erro
 		logger.Errorln(err)
 		return "", err
 	}
+	defer resp.Body.Close()
 	var s = new(ScanResponse)
 	err = json.NewDecoder(resp.Body).Decode(&s)
 	filterHeaders := func(s string) bool { return strings.HasPrefix(s, "X-") }
 	rateLimits := utils.FilterMap(resp.Header, filterHeaders)
 	api.Limits = rateLimits
-	defer resp.Body.Close()
 	if err != nil {
 		logger.Errorln(err)
 		return "", err

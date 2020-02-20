@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"github.com/OPSWAT/mdcloud-go/lookup"
-	"github.com/OPSWAT/mdcloud-go/utils"
+	"github.com/OPSWAT/mdcloud-go/pkg/lookup"
+	"github.com/OPSWAT/mdcloud-go/pkg/utils"
 	"github.com/spf13/cobra"
 )
 

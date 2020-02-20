@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"github.com/OPSWAT/mdcloud-go/aws"
-	"github.com/OPSWAT/mdcloud-go/ipscan"
+	"github.com/OPSWAT/mdcloud-go/pkg/aws"
+	"github.com/OPSWAT/mdcloud-go/pkg/ipscan"
 	logger "github.com/sirupsen/logrus"
 
 	"github.com/spf13/cobra"

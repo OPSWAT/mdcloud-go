@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/OPSWAT/mdcloud-go/api"
-	"github.com/OPSWAT/mdcloud-go/utils"
+	"github.com/OPSWAT/mdcloud-go/pkg/api"
+	"github.com/OPSWAT/mdcloud-go/pkg/utils"
 	logstash "github.com/bshuster-repo/logrus-logstash-hook"
 	gelf "github.com/fabienm/go-logrus-formatters"
 	logger "github.com/sirupsen/logrus"

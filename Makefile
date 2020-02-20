@@ -24,7 +24,7 @@ ifndef VERSION
 $(error VERSION is not set)
 endif
 	# VERSION=$(git describe --abbrev=0 --tags --dirty="-$(git rev-parse --abbrev-ref HEAD)")
-	@docker run -e VERSION=$(VERSION) -v $(shell pwd):/go/src/github.com/OPSWAT/mdcloud-go --rm opswat/mdcloud-go:$(MDCLOUD_GO_VERSION) /go/src/github.com/OPSWAT/mdcloud-go/build.sh
+	@docker run -e VERSION=$(VERSION) -v $(shell pwd):/go/src/github.com/OPSWAT/mdcloud-go --rm opswat/mdcloud-go:$(MDCLOUD_GO_VERSION) /go/src/github.com/OPSWAT/mdcloud-go/pkg/build.sh
 .PHONY: build
 
 # Build docker image

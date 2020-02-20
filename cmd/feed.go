@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/OPSWAT/mdcloud-go/feed"
+	"github.com/OPSWAT/mdcloud-go/pkg/feed"
 	"github.com/spf13/cobra"
 )
 
