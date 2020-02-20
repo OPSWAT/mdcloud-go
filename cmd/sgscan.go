@@ -3,7 +3,7 @@ package cmd
 import (
 	"github.com/OPSWAT/mdcloud-go/pkg/aws"
 	"github.com/OPSWAT/mdcloud-go/pkg/ipscan"
-	logger "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 
 	"github.com/spf13/cobra"
 )
@@ -19,7 +19,7 @@ var sgscanCmd = &cobra.Command{
 		if aws.Session == nil {
 			aws.LoadProfile()
 			if _, err := aws.Session.Config.Credentials.Get(); err != nil {
-				logger.Fatalln("Couldn't find AWS config under~/.aws/credentials")
+				logrus.Fatalln("Couldn't find AWS config under~/.aws/credentials")
 			}
 		}
 		if groups != nil {

@@ -11,7 +11,7 @@ import (
 	"github.com/OPSWAT/mdcloud-go/pkg/api"
 	"github.com/OPSWAT/mdcloud-go/pkg/utils"
 	"github.com/fsnotify/fsnotify"
-	logger "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 // ScanOptions from scan cmd
@@ -33,14 +33,14 @@ func Scan(api *api.API, options ScanOptions) {
 		if !path.IsAbs(fname) {
 			wd, err := os.Getwd()
 			if err != nil {
-				logger.Panicln(err)
+				logrus.Panicln(err)
 			}
 			fname = path.Clean(path.Join(wd, fname))
 			options.Path[0] = fname
 		}
 		fi, err := os.Stat(fname)
 		if err != nil {
-			logger.Fatalln(err)
+			logrus.Fatalln(err)
 		}
 		switch mode := fi.Mode(); {
 		case mode.IsDir():
@@ -48,9 +48,9 @@ func Scan(api *api.API, options ScanOptions) {
 		case mode.IsRegular():
 			if !options.LookupFile {
 				if res, err := api.ScanFile(fname, options.Headers, options.Poll); err == nil {
-					logger.WithField("result", res).Infoln("Scan result")
+					logrus.WithField("result", res).Infoln("Scan result")
 				} else {
-					logger.Fatalln(err)
+					logrus.Fatalln(err)
 				}
 			} else {
 				lookupSHA1(api, fname, options)
@@ -64,7 +64,7 @@ func watchScan(api *api.API, options ScanOptions) {
 	defer watcher.Close()
 
 	if err := filepath.Walk(options.Path[0], addPaths); err != nil {
-		logger.Fatalln(err)
+		logrus.Fatalln(err)
 	}
 
 	var rate time.Duration
@@ -81,12 +81,12 @@ func watchScan(api *api.API, options ScanOptions) {
 			select {
 			case event := <-watcher.Events:
 				if !strings.Contains(event.Name, "/.") && ((event.Op == fsnotify.Write) || (event.Op == fsnotify.Create)) {
-					logger.WithFields(logger.Fields{"op": event.Op, "type": event.Name}).Infoln("Change detected")
+					logrus.WithFields(logrus.Fields{"op": event.Op, "type": event.Name}).Infoln("Change detected")
 					<-throttle
 					if len(api.Limits) > 0 {
 						if res, _ := strconv.Atoi(api.Limits["X-Ratelimit-Remaining"][0]); res > 1 {
 							if res < 50 {
-								logger.WithField("X-Ratelimit-Remaining", res).Warnln("limit less than 50")
+								logrus.WithField("X-Ratelimit-Remaining", res).Warnln("limit less than 50")
 							}
 							go lookupSHA1(api, event.Name, options)
 						} else {
@@ -95,7 +95,7 @@ func watchScan(api *api.API, options ScanOptions) {
 							if sz > 0 && resetIn[sz-1] == 's' {
 								resetIn = resetIn[:sz-1]
 								sleepTime, _ := strconv.Atoi(resetIn)
-								logger.WithField("X-RateLimit-Reset-In", resetIn).Warnln("limit reached, will delay until it is reset")
+								logrus.WithField("X-RateLimit-Reset-In", resetIn).Warnln("limit reached, will delay until it is reset")
 								time.Sleep(time.Duration(sleepTime) * time.Second)
 							}
 						}
@@ -104,7 +104,7 @@ func watchScan(api *api.API, options ScanOptions) {
 					}
 				}
 			case err := <-watcher.Errors:
-				logger.Fatalln(err)
+				logrus.Fatalln(err)
 			}
 		}
 	}()
@@ -114,24 +114,24 @@ func watchScan(api *api.API, options ScanOptions) {
 func lookupSHA1(api *api.API, filePath string, options ScanOptions) {
 	file, err := os.Open(filePath)
 	if err != nil {
-		logger.Warningln("Failed to read file")
+		logrus.Warningln("Failed to read file")
 		return
 	}
 	stat, err := file.Stat()
 	defer file.Close()
 	if err == nil {
 		if err := filepath.Walk(filePath, addPaths); err != nil {
-			logger.Fatalln(err)
+			logrus.Fatalln(err)
 		}
 	}
 	if !stat.IsDir() {
 		resSha1, err := utils.GetFileSHA1(filePath)
 		if err == nil {
 			if res, err := api.FindOrScan(filePath, resSha1, options.Headers, options.LookupFile, options.Poll); err == nil {
-				logger.Println(res)
+				logrus.Println(res)
 			}
 		} else {
-			logger.Println(api.ScanFile(filePath, options.Headers, options.Poll))
+			logrus.Println(api.ScanFile(filePath, options.Headers, options.Poll))
 		}
 	}
 }

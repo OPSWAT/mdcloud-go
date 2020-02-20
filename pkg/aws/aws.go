@@ -2,7 +2,7 @@ package aws
 
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
-	logger "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 // Session variable related to the current AWS account
@@ -14,7 +14,7 @@ var (
 func LoadProfile() {
 	Session = session.Must(session.NewSession())
 	if _, err := Session.Config.Credentials.Get(); err != nil {
-		logger.Fatalln("Couldn't find AWS config under ~/.aws/credentials, it's required for security group scanning commands")
+		logrus.Fatalln("Couldn't find AWS config under ~/.aws/credentials, it's required for security group scanning commands")
 	}
 
 	// defaults to us-west-2

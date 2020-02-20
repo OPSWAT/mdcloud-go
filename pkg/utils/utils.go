@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/pkg/errors"
-	logger "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 // StringInSlice checks for string in slice
@@ -64,7 +64,7 @@ func VerifyArgsOrRun(args []string, equalTo int, call ...func()) {
 		if call[1] != nil {
 			call[1]()
 		} else {
-			logger.Fatalln("args count not valid")
+			logrus.Fatalln("args count not valid")
 		}
 	}
 }

@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	logger "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 // API struct containing main details
@@ -65,7 +65,7 @@ func (api *API) setType() error {
 	resp, err := api.Client.Do(req)
 	if body, err := ioutil.ReadAll(resp.Body); err == nil {
 		if e := json.Unmarshal(body, &apikeyStatus); e != nil {
-			logger.Fatalln(e)
+			logrus.Fatalln(e)
 			return e
 		}
 	}

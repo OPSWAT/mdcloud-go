@@ -9,7 +9,7 @@ import (
 	"github.com/OPSWAT/mdcloud-go/pkg/utils"
 	logstash "github.com/bshuster-repo/logrus-logstash-hook"
 	gelf "github.com/fabienm/go-logrus-formatters"
-	logger "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	prettyf "github.com/x-cray/logrus-prefixed-formatter"
 )
@@ -29,14 +29,14 @@ var RootCmd = &cobra.Command{
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		switch formatter {
 		case "json":
-			logger.SetFormatter(&logger.JSONFormatter{})
+			logrus.SetFormatter(&logrus.JSONFormatter{})
 		case "gelf":
 			hostname, _ := os.Hostname()
-			logger.SetFormatter(gelf.NewGelf(hostname))
+			logrus.SetFormatter(gelf.NewGelf(hostname))
 		case "logstash":
-			logger.SetFormatter(&logstash.LogstashFormatter{})
+			logrus.SetFormatter(&logstash.LogstashFormatter{})
 		case "text":
-			logger.SetFormatter(&prettyf.TextFormatter{})
+			logrus.SetFormatter(&prettyf.TextFormatter{})
 		}
 	},
 }
@@ -57,11 +57,11 @@ func Execute(version string) {
 	}
 
 	if apikeyErr != nil {
-		logger.Fatalln(apikeyErr)
+		logrus.Fatalln(apikeyErr)
 	}
 
 	if err := RootCmd.Execute(); err != nil {
-		logger.Fatalln(err)
+		logrus.Fatalln(err)
 		os.Exit(1)
 	}
 }
@@ -75,7 +75,7 @@ func init() {
 type Response struct{}
 
 // Format parses the message, returns raw json, no log
-func (f *Response) Format(entry *logger.Entry) ([]byte, error) {
+func (f *Response) Format(entry *logrus.Entry) ([]byte, error) {
 	var js map[string]interface{}
 	if json.Unmarshal([]byte(entry.Message), &js) != nil && utils.IsLetter(string(entry.Message[0])) {
 		return nil, nil

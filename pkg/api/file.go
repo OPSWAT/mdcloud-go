@@ -13,7 +13,7 @@ import (
 
 	"github.com/OPSWAT/mdcloud-go/pkg/utils"
 	"github.com/google/go-cmp/cmp"
-	logger "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 // RescanReq used for rescan body
@@ -98,13 +98,13 @@ func (api *API) ScanFile(path string, headers []string, poll bool) (string, erro
 	url := fmt.Sprintf("%s/file", api.URL)
 	file, err := os.Open(path)
 	if err != nil {
-		logger.Errorln(err)
+		logrus.Errorln(err)
 		return "", err
 	}
 	defer file.Close()
 	req, err := http.NewRequest(http.MethodPost, url, file)
 	if err != nil {
-		logger.Errorln(err)
+		logrus.Errorln(err)
 		return "", err
 	}
 	req.Header.Add("apikey", api.Token)
@@ -118,7 +118,7 @@ func (api *API) ScanFile(path string, headers []string, poll bool) (string, erro
 	}
 	resp, err := api.Client.Do(req)
 	if err != nil {
-		logger.Errorln(err)
+		logrus.Errorln(err)
 		return "", err
 	}
 	defer resp.Body.Close()
@@ -128,19 +128,19 @@ func (api *API) ScanFile(path string, headers []string, poll bool) (string, erro
 	rateLimits := utils.FilterMap(resp.Header, filterHeaders)
 	api.Limits = rateLimits
 	if err != nil {
-		logger.Errorln(err)
+		logrus.Errorln(err)
 		return "", err
 	}
 	if resp.StatusCode != 200 {
-		logger.WithFields(logger.Fields{"status_code": resp.StatusCode, "error_code": s.Error.Code, "error_message": strings.Join(s.Error.Messages, ",")}).Errorln(resp.Status)
+		logrus.WithFields(logrus.Fields{"status_code": resp.StatusCode, "error_code": s.Error.Code, "error_message": strings.Join(s.Error.Messages, ",")}).Errorln(resp.Status)
 		return "", nil
 	}
 	if !poll {
-		logger.WithField("data_id", s.DataID).Infoln("Result data_id")
+		logrus.WithField("data_id", s.DataID).Infoln("Result data_id")
 		if r, e := json.Marshal(s); e == nil {
 			return string(r), nil
 		}
-		logger.Errorln(err)
+		logrus.Errorln(err)
 		return "", err
 	}
 	var jsonResult string
@@ -161,7 +161,7 @@ func (api *API) ScanFile(path string, headers []string, poll bool) (string, erro
 				jsonResult = string(response)
 				go func() { done <- true }()
 			}
-			logger.WithFields(logger.Fields{
+			logrus.WithFields(logrus.Fields{
 				"data_id":  s.DataID,
 				"progress": result.ScanResults.ProgressPercentage,
 			}).Info("Scan progress")
@@ -228,7 +228,7 @@ func (api *API) FindOrScan(path, hash string, headers []string, lookup, poll boo
 	strRes, err := api.HashDetails(hash)
 	json.NewDecoder(strings.NewReader(strRes)).Decode(&result)
 	if cmp.Equal(result.Error, ApiError{}) {
-		logger.WithField("hash", hash).Info("Hash not found sending to scan")
+		logrus.WithField("hash", hash).Info("Hash not found sending to scan")
 		return api.ScanFile(path, headers, poll)
 	}
 	return strRes, err

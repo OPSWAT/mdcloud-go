@@ -16,7 +16,7 @@ import (
 	"github.com/OPSWAT/mdcloud-go/pkg/api"
 	"github.com/OPSWAT/mdcloud-go/pkg/aws"
 	"github.com/OPSWAT/mdcloud-go/pkg/utils"
-	logger "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 
 	"github.com/pkg/errors"
 
@@ -58,7 +58,7 @@ func ScanSGs(api api.API, sgs []string) {
 		}
 	}
 	if len(ips) == 0 {
-		logger.Warningln("security group empty")
+		logrus.Warningln("security group empty")
 		os.Exit(1)
 	}
 
@@ -96,7 +96,7 @@ func ScanSGs(api api.API, sgs []string) {
 					if e := json.Unmarshal(body, &rp); e != nil {
 						errc <- errors.New("parsing response")
 					}
-					logger.WithFields(logger.Fields{
+					logrus.WithFields(logrus.Fields{
 						"code":  rp.Error.Code,
 						"msg":   strings.Join(rp.Error.Messages, " "),
 						"batch": strings.Join(batch, ","),
@@ -106,7 +106,7 @@ func ScanSGs(api api.API, sgs []string) {
 				if remaining, err := strconv.Atoi(resp.Header.Get("x-ratelimit-remaining")); err == nil {
 					if remaining > 0 {
 						for _, item := range batch {
-							logger.WithField("ip", item).Infoln("OK")
+							logrus.WithField("ip", item).Infoln("OK")
 						}
 					} else {
 						errc <- errors.New("limit reached")
@@ -127,7 +127,7 @@ func ScanSGs(api api.API, sgs []string) {
 	case <-done:
 	case err := <-errc:
 		if err != nil {
-			logger.Errorln(err)
+			logrus.Errorln(err)
 			return
 		}
 	}
@@ -147,12 +147,12 @@ func ListIPs(sgs []string) {
 		}
 	}
 	if len(ips) == 0 {
-		logger.Fatalln(errors.New("Security group empty"))
+		logrus.Fatalln(errors.New("Security group empty"))
 	}
 
 	// TODO: display security groups before
 	for _, ip := range ips {
-		logger.Infoln(ip)
+		logrus.Infoln(ip)
 	}
 }
 
@@ -176,6 +176,6 @@ func getGroups(sgs []string) {
 		groups, err = svc.DescribeSecurityGroups(&ec2.DescribeSecurityGroupsInput{})
 	}
 	if err != nil {
-		logger.WithField("security_groups", sgs).Fatalln(errors.WithMessage(err, "Error requesting group description"))
+		logrus.WithField("security_groups", sgs).Fatalln(errors.WithMessage(err, "Error requesting group description"))
 	}
 }
