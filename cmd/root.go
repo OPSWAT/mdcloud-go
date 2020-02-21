@@ -8,7 +8,6 @@ import (
 	"github.com/OPSWAT/mdcloud-go/pkg/api"
 	"github.com/OPSWAT/mdcloud-go/pkg/utils"
 	logstash "github.com/bshuster-repo/logrus-logstash-hook"
-	gelf "github.com/fabienm/go-logrus-formatters"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	prettyf "github.com/x-cray/logrus-prefixed-formatter"
@@ -30,9 +29,9 @@ var RootCmd = &cobra.Command{
 		switch formatter {
 		case "json":
 			logrus.SetFormatter(&logrus.JSONFormatter{})
-		case "gelf":
-			hostname, _ := os.Hostname()
-			logrus.SetFormatter(gelf.NewGelf(hostname))
+		// case "gelf":
+		// 	hostname, _ := os.Hostname()
+		// 	logrus.SetFormatter(gelf.NewGelf(hostname))
 		case "logstash":
 			logrus.SetFormatter(&logstash.LogstashFormatter{})
 		case "text":
