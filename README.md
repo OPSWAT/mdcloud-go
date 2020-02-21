@@ -65,11 +65,9 @@ Usage:
 
 Available Commands:
   appinfo       Appinfo for hash
-  cve           CVE lookup
-  cves          Available CVE list
   feed          Feed of hashes, infected or false-positives
   help          Help about any command
-  lookup        Lookup or download file or IP
+  lookup        Lookup or download file or IPs/Domains/URLs
   rescan        Rescan file
   sanitized     Sanitized result by file_id
   scan          Scan file or path
@@ -79,8 +77,8 @@ Available Commands:
   vulnerability Vulnerability for hash
 
 Flags:
-  -a, --apikey string      set apikey token
-  -f, --formatter string   set formatter type to text, json or raw (default "text")
+  -a, --apikey string      set apikey token (default is MDCLOUD_APIKEY env variable)
+  -f, --formatter string   set formatter type to  json or text (default "text")
   -h, --help               help for mdcloud
 
 Use "mdcloud [command] --help" for more information about a command.
