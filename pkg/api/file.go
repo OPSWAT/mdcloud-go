@@ -5,9 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -57,9 +59,10 @@ func (api *API) ScanFile(path string, headers []string, poll bool) (string, erro
 		logrus.Errorln(err)
 		return "", err
 	}
-	defer resp.Body.Close()
+
 	var s = new(ScanResp)
-	err = json.NewDecoder(resp.Body).Decode(&s)
+	progress, _ := ioutil.ReadAll(resp.Body)
+	err = json.Unmarshal(progress, &s)
 	filterHeaders := func(s string) bool { return strings.HasPrefix(s, "X-") }
 	rateLimits := utils.FilterMap(resp.Header, filterHeaders)
 	api.Limits = rateLimits
@@ -70,7 +73,10 @@ func (api *API) ScanFile(path string, headers []string, poll bool) (string, erro
 	if resp.StatusCode != 200 {
 		logrus.WithFields(logrus.Fields{"status_code": resp.StatusCode, "error_code": s.Error.Code, "error_message": strings.Join(s.Error.Messages, ",")}).Errorln(resp.Status)
 		return "", nil
+	} else {
+		logrus.WithFields(logrus.Fields{"result": string(progress)}).Infoln(fmt.Sprintf("Uploaded %s", filepath.Base(path)))
 	}
+	defer resp.Body.Close()
 	if !poll {
 		logrus.WithField("data_id", s.DataID).Infoln("Result data_id")
 		if r, e := json.Marshal(s); e == nil {
@@ -92,14 +98,14 @@ func (api *API) ScanFile(path string, headers []string, poll bool) (string, erro
 				return "", errors.New("Failed to get results for: " + resDataID)
 			}
 			json.NewDecoder(strings.NewReader(resDataID)).Decode(&result)
+			response, _ := json.Marshal(resDataID)
+			jsonResult, _ = strconv.Unquote(string(response))
 			if result.ScanResults.ProgressPercentage == 100 {
-				response, _ := json.Marshal(result)
-				jsonResult = string(response)
 				go func() { done <- true }()
 			}
 			logrus.WithFields(logrus.Fields{
-				"data_id":  s.DataID,
-				"progress": result.ScanResults.ProgressPercentage,
+				"data_id":             s.DataID,
+				"progress_percentage": result.ScanResults.ProgressPercentage,
 			}).Info("Scan progress")
 		case <-done:
 			close(done)
