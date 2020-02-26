@@ -33,5 +33,5 @@ ifndef VERSION
 $(error VERSION is not set)
 endif
 	@docker build --build-arg VERSION=$(VERSION) -t opswat/mdcloud-go:$(VERSION) -f "./image.dockerfile" .
-	@docker push opswat/mdcloud-go:$(VERSION)
+	# @docker push opswat/mdcloud-go:$(VERSION)
 .PHONY: image
